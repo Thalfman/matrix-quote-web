@@ -17,9 +17,12 @@ matrix-quote-web/
 ├── backend/         # FastAPI wrapper
 │   └── app/
 │       ├── explain.py          # per-quote driver contributions + neighbor search
+│       ├── pdf.py              # render_quote_pdf() — WeasyPrint/Jinja PDF renderer
 │       ├── quotes_storage.py   # saved-quote CRUD, atomic-replace parquet persistence
+│       ├── templates/          # Jinja2 PDF template + print CSS + SVG wordmark
 │       └── routes/
-│           └── quotes.py       # /api/quotes CRUD + duplicate endpoints
+│           ├── quote.py        # /api/quote/single + /api/quote/pdf (ad-hoc PDF)
+│           └── quotes.py       # /api/quotes CRUD + duplicate + per-scenario PDF
 ├── frontend/        # Vite SPA (Inter font, Matrix navy/electric-blue palette)
 ├── scripts/         # one-off utilities
 │   └── build_test_fixtures.py   # generate synthetic fixture models (run once)
@@ -61,6 +64,8 @@ degrade gracefully to `null` if models don't support SHAP.
 | `GET` | `/api/quotes/{id}` | Full scenario detail (`SavedQuote`) |
 | `DELETE` | `/api/quotes/{id}` | Remove a scenario (204) |
 | `POST` | `/api/quotes/{id}/duplicate` | Clone a scenario under a new id (201) |
+| `GET` | `/api/quotes/{id}/pdf` | Download a saved scenario as a PDF file |
+| `POST` | `/api/quote/pdf` | Download an unsaved cockpit result as a PDF (`AdHocPdfRequest` body) |
 
 No auth gate on quotes endpoints. `created_by` is a browser-captured display name (stored in `localStorage`) sent with each save.
 
@@ -101,6 +106,8 @@ cd frontend && npm test
 3. Set env vars: `ADMIN_PASSWORD`, `ADMIN_JWT_SECRET`, `DATA_DIR=/data`.
 4. Deploy — the Dockerfile builds the frontend and serves it alongside the API.
 
+The production image installs `libpango-1.0-0 libpangoft2-1.0-0 libcairo2 libharfbuzz0b fonts-liberation` at build time so WeasyPrint can render PDFs. These libraries are absent on Windows dev boxes; `pdf.py` uses a lazy `from weasyprint import HTML` inside the render function so the module imports cleanly locally — the `OSError` only surfaces at render time (i.e. only if you actually call the PDF endpoint without the native libs installed).
+
 First-use checklist in production: sign in at `/admin/login`, upload a project-hours xlsx on `/admin/train`, wait for the 12 operation models to train. After training completes the `/` Single Quote page becomes usable.
 
 ### Single Quote cockpit
@@ -109,9 +116,11 @@ The Single Quote page (`/`) uses a two-column CSS-grid workspace on `≥lg` view
 
 **Save Scenario flow:** the "Save scenario" button prompts for a name and project name, then calls `POST /api/quotes` and toasts on success. The `created_by` field is populated from the browser display name captured via `frontend/src/lib/displayName.ts` (stored in `localStorage`; the user is prompted once on first save). The "Compare" button navigates to `/quotes` where saved scenarios can be bulk-selected.
 
+**Export PDF (ad-hoc):** the "Export PDF" button in the cockpit result panel prompts for a project name, then calls `POST /api/quote/pdf` and triggers a browser download — no save required. The PDF is a 3-page Matrix-branded document: cover with headline estimate, per-bucket breakdown + input summary, and assumptions/disclaimers.
+
 ### Saved Quotes (`/quotes`)
 
-Filterable, searchable list of all persisted scenarios. Columns: name, project, industry, hours (p50), range (p10–p90), saved-at. Filters: project dropdown, industry dropdown, free-text search. Bulk-select 2–3 rows to enable the "Compare selected" button. Per-row actions: Duplicate, Delete.
+Filterable, searchable list of all persisted scenarios. Columns: name, project, industry, hours (p50), range (p10–p90), saved-at. Filters: project dropdown, industry dropdown, free-text search. Bulk-select 2–3 rows to enable the "Compare selected" button. Per-row actions: Duplicate, Delete, Export PDF. The PDF action calls `GET /api/quotes/{id}/pdf` and triggers a browser download.
 
 ### Compare (`/quotes/compare?ids=a,b[,c]`)
 
@@ -133,4 +142,4 @@ Side-by-side view for 2–3 saved scenarios:
 | `/performance` | `ModelPerformance` | Estimate accuracy dashboard |
 | `/admin/*` | Admin pages | Upload, train, data explorer (auth-gated) |
 
-PDF export (`/api/quotes/{id}/pdf`, `POST /api/quote/pdf`) lands in Plan D.
+Compare-PDF (multi-scenario) is deferred per spec; only single-quote PDFs are supported.
