@@ -37,6 +37,15 @@ export function QuoteForm({ dropdowns, submitting, onSubmit, form, formRef }: Pr
 
   return (
     <form ref={formRef} onSubmit={fire}>
+      {_hasLastValues() && (
+        <button
+          type="button"
+          onClick={() => form.reset(_readLastValues())}
+          className="text-xs text-brand hover:underline"
+        >
+          Populate with last quote
+        </button>
+      )}
       <Section step="01" title="Project classification" description="Segment, system type, and project flags">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <Field label="Industry segment" error={formState.errors.industry_segment?.message}>
@@ -348,4 +357,13 @@ export function QuoteForm({ dropdowns, submitting, onSubmit, form, formRef }: Pr
       </div>
     </form>
   );
+}
+
+const LAST_KEY = "matrix.singlequote.last";
+
+function _hasLastValues(): boolean {
+  try { return !!sessionStorage.getItem(LAST_KEY); } catch { return false; }
+}
+function _readLastValues(): QuoteFormValues {
+  return JSON.parse(sessionStorage.getItem(LAST_KEY) || "{}") as QuoteFormValues;
 }
