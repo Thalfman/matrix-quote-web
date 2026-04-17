@@ -1,4 +1,3 @@
-// frontend/src/pages/single-quote/HeroEstimate.tsx
 import { ExplainedQuoteResponse } from "@/api/types";
 import { useCountUp } from "@/lib/useCountUp";
 
@@ -27,31 +26,72 @@ export function HeroEstimate({ result }: { result: ExplainedQuoteResponse }) {
   const animated = useCountUp(total);
   const dots = confidenceDots(rel);
 
+  // CI rail math — clamp marker position to [10%, 90%] of rail.
+  const range = Math.max(1, high - low);
+  const leftPct  = Math.max(0, Math.min(100, ((low - low) / range) * 100));  // always 0
+  const rightPct = Math.max(0, Math.min(100, 100 - ((high - low) / range) * 100));  // always 0
+  const markerPct = Math.max(0, Math.min(100, ((total - low) / range) * 100));
+  const bandPercent = Math.round((rel / 2) * 100);
+
   return (
-    <div className="card p-6 bg-gradient-to-br from-navy-900/[0.03] to-transparent">
-      <div className="text-[10px] tracking-widest text-muted font-semibold">
-        ESTIMATED HOURS
-      </div>
-      <div className="mt-2 text-display numeric leading-none text-ink">
-        {formatHours(animated)}
-      </div>
-      <div className="mt-3 text-sm text-muted">
-        Range {formatHours(low)} – {formatHours(high)} · 90% CI
-      </div>
-      <div className="mt-3 flex items-center gap-2.5 text-sm">
-        <span className="text-muted">Confidence</span>
-        <span aria-hidden="true" className="flex gap-1">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <span
-              key={i}
-              className={
-                "w-1.5 h-1.5 rounded-full " +
-                (i <= dots ? "bg-teal" : "bg-line2")
-              }
+    <div className="card relative overflow-hidden">
+      <div
+        aria-hidden="true"
+        className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber via-amber/70 to-transparent"
+      />
+      <div className="p-6 pt-7">
+        <div className="flex items-center justify-between">
+          <div className="eyebrow text-[11px] text-muted">Estimated hours</div>
+        </div>
+
+        <div className="mt-3 flex items-end gap-4">
+          <div className="display-hero text-[76px] leading-none tracking-tight text-ink tnum">
+            {formatHours(animated)}
+          </div>
+          <div className="pb-3">
+            <div className="eyebrow text-[10px] text-muted">hrs</div>
+          </div>
+        </div>
+
+        <div className="mt-5">
+          <div className="flex items-baseline justify-between text-[11px] text-muted mono">
+            <span>p10 · {formatHours(low)}</span>
+            <span className="eyebrow text-[10px]">90% CI</span>
+            <span>p90 · {formatHours(high)}</span>
+          </div>
+          <div className="relative h-2 mt-2 bg-line rounded-full">
+            <div
+              className="absolute inset-y-0 bg-teal/30 rounded-full"
+              style={{ left: `${leftPct}%`, right: `${rightPct}%` }}
+              aria-hidden="true"
             />
-          ))}
-        </span>
-        <span className="font-medium text-ink">{confidenceLabel(dots)}</span>
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-ink border-2 border-amber shadow-sm"
+              style={{ left: `calc(${markerPct}% - 6px)` }}
+              aria-hidden="true"
+            />
+          </div>
+          <div className="flex items-center justify-between mt-3">
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-muted">Confidence</span>
+              <span aria-hidden="true" className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <span
+                    key={i}
+                    className={
+                      "w-1.5 h-1.5 rounded-full " +
+                      (i <= dots ? "bg-amber" : "bg-line2")
+                    }
+                  />
+                ))}
+              </span>
+              <span className="font-medium text-ink">{confidenceLabel(dots)}</span>
+            </div>
+            <div className="text-xs text-muted">
+              ±<span className="mono">{bandPercent}%</span> band
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

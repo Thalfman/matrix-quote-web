@@ -105,7 +105,7 @@ const explainedResponse = {
 async function renderAndWaitForForm() {
   mockGet.mockImplementation(readyGetMock);
   const rendered = renderWithProviders(<SingleQuote />);
-  await rendered.findByRole("button", { name: /estimate hours/i });
+  await rendered.findByRole("button", { name: /regenerate estimate/i });
   return rendered;
 }
 
@@ -140,7 +140,7 @@ describe("SingleQuote", () => {
     renderWithProviders(<SingleQuote />);
 
     expect(await screen.findByText(/models are not trained/i)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /estimate hours/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /regenerate estimate/i })).not.toBeInTheDocument();
   });
 
   it("renders the form when models are ready and submits a prediction", async () => {
@@ -148,7 +148,7 @@ describe("SingleQuote", () => {
 
     const { container } = await renderAndWaitForForm();
 
-    const button = screen.getByRole("button", { name: /estimate hours/i });
+    const button = screen.getByRole("button", { name: /regenerate estimate/i });
     expect(button).toBeInTheDocument();
 
     submitForm(container);
@@ -234,7 +234,8 @@ describe("SingleQuote", () => {
     // Under reduced motion useCountUp returns target immediately.
     // The hero element has class text-display and shows the formatted value.
     await waitFor(() => {
-      const heroEl = container.querySelector(".text-display");
+      // The hero number is the display-hero div inside #quote-results (not the page h1).
+      const heroEl = container.querySelector("#quote-results .display-hero");
       // Intl formats 100 as "100".
       expect(heroEl?.textContent).toBe("100");
     });
