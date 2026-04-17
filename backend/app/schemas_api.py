@@ -57,6 +57,8 @@ __all__ = [
     "TrainingRunRow",
     "PerformanceHeadline",
     "InsightsOverview",
+    "DemoStatus",
+    "DemoLoadResponse",
 ]
 
 
@@ -305,3 +307,14 @@ class InsightsOverview(BaseModel):
     accuracy_heatmap: list[list[float | None]]   # rows = operations, cols = quarters
     operations: list[str]
     quarters: list[str]
+
+
+class DemoStatus(BaseModel):
+    is_demo: bool = False
+    enabled_env: bool = False
+    has_real_data: bool = False
+
+
+class DemoLoadResponse(BaseModel):
+    loaded: bool
+    reason: str | None = None
