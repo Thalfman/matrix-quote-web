@@ -1,4 +1,12 @@
-# backend/app/routes/insights.py
+"""Insights routes — executive-facing KPI snapshot.
+
+Single endpoint: GET /api/insights/overview returns InsightsOverview with
+aggregated quote activity, model readiness counts, MAPE, calibration band %, and
+a 26-week activity time-series.  All fields that depend on optional parquet files
+(accuracy_heatmap, calibration_within_band_pct) degrade gracefully to empty/None
+until the training pipeline begins persisting metrics_history.parquet and
+calibration.parquet.
+"""
 from __future__ import annotations
 
 import pandas as pd
@@ -17,6 +25,12 @@ MODELS_TARGET = 12
 
 @router.get("/overview", response_model=InsightsOverview)
 def overview() -> InsightsOverview:
+    """Return the executive KPI snapshot.
+
+    Fields sourced from optional parquet files return empty lists or None when
+    those files do not yet exist on disk; callers should render empty-state UI
+    rather than treating null as an error.
+    """
     quotes_df = _quotes_as_df()
 
     calibration_df = pd.read_parquet(calibration_path()) if calibration_path().exists() else None

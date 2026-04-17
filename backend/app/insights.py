@@ -14,6 +14,11 @@ def weekly_quotes_activity(
     weeks: int = 26,
     end: pd.Timestamp | None = None,
 ) -> list[tuple[str, int]]:
+    """Return (ISO-week-label, count) tuples for the last `weeks` calendar weeks.
+
+    Always returns exactly `weeks` entries; weeks with no saves get a zero count.
+    Labels are ISO-8601 week strings, e.g. '2026-W04'.
+    """
     end = pd.Timestamp(end) if end is not None else pd.Timestamp.utcnow()
     end_week = end.to_period("W-SUN")
     start_week = end_week - (weeks - 1)
@@ -29,6 +34,7 @@ def weekly_quotes_activity(
 
 
 def active_quotes_last_n_days(quotes: pd.DataFrame, n: int = 30) -> int:
+    """Count quotes created within the last `n` days (UTC). Returns 0 when the store is empty."""
     if quotes.empty or "created_at" not in quotes.columns:
         return 0
     s = pd.to_datetime(quotes["created_at"], errors="coerce").dropna()
@@ -64,6 +70,11 @@ def accuracy_heatmap(
 
 
 def calibration_within_band_pct(calibration: pd.DataFrame | None) -> float | None:
+    """Return the percentage of predictions whose actual value falls inside the predicted band.
+
+    Returns None when the calibration parquet is absent — the frontend should show a dash
+    rather than 0% until the training pipeline begins persisting this file.
+    """
     if calibration is None or calibration.empty:
         return None
     inside = calibration["inside_band"].mean() if "inside_band" in calibration.columns else None

@@ -1,4 +1,13 @@
-"""Public metrics, health, and dropdown-catalog routes."""
+"""Public metrics, health, and dropdown-catalog routes.
+
+Original endpoints: GET /api/health, GET /api/metrics, GET /api/catalog/dropdowns.
+
+Plan E additions — all three degrade to empty/None when the optional parquet files
+are absent (training pipeline does not yet write them):
+  GET /api/metrics/history      — per-run training history (TrainingRunRow list)
+  GET /api/metrics/calibration  — prediction-vs-actual scatter points (CalibrationPoint list)
+  GET /api/metrics/headline     — single-row performance summary (PerformanceHeadline)
+"""
 
 from __future__ import annotations
 

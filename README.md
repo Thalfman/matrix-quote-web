@@ -22,7 +22,9 @@ matrix-quote-web/
 │       ├── templates/          # Jinja2 PDF template + print CSS + SVG wordmark
 │       └── routes/
 │           ├── quote.py        # /api/quote/single + /api/quote/pdf (ad-hoc PDF)
-│           └── quotes.py       # /api/quotes CRUD + duplicate + per-scenario PDF
+│           ├── quotes.py       # /api/quotes CRUD + duplicate + per-scenario PDF
+│           ├── metrics.py      # /api/metrics/* — headline + history + calibration
+│           └── insights.py     # /api/insights/overview — executive KPI snapshot
 ├── frontend/        # Vite SPA (Inter font, Matrix navy/electric-blue palette)
 ├── scripts/         # one-off utilities
 │   └── build_test_fixtures.py   # generate synthetic fixture models (run once)
@@ -66,6 +68,16 @@ degrade gracefully to `null` if models don't support SHAP.
 | `POST` | `/api/quotes/{id}/duplicate` | Clone a scenario under a new id (201) |
 | `GET` | `/api/quotes/{id}/pdf` | Download a saved scenario as a PDF file |
 | `POST` | `/api/quote/pdf` | Download an unsaved cockpit result as a PDF (`AdHocPdfRequest` body) |
+
+### Metrics and Insights API
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/metrics` | Per-operation model metrics summary (`MetricsSummary`) |
+| `GET` | `/api/metrics/history` | Per-run training history (`TrainingRunRow[]`); returns `[]` until training pipeline persists `metrics_history.parquet` |
+| `GET` | `/api/metrics/calibration` | Prediction-vs-actual scatter points (`CalibrationPoint[]`); returns `[]` until `calibration.parquet` exists |
+| `GET` | `/api/metrics/headline` | Single-row performance summary (`PerformanceHeadline`); fields are `null` when optional parquet files are absent |
+| `GET` | `/api/insights/overview` | Executive KPI snapshot (`InsightsOverview`): active quotes, model readiness, MAPE, calibration band %, 26-week activity chart, latest 5 quotes, MAPE heatmap |
 
 No auth gate on quotes endpoints. `created_by` is a browser-captured display name (stored in `localStorage`) sent with each save.
 

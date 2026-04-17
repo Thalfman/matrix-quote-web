@@ -44,8 +44,18 @@ def quotes_parquet_path() -> Path:
 
 
 def metrics_history_path() -> Path:
+    """Path to the per-run training-history parquet.
+
+    Written by the training pipeline (not yet implemented); callers must check
+    `.exists()` before reading.
+    """
     return models_dir() / "metrics_history.parquet"
 
 
 def calibration_path() -> Path:
+    """Path to the prediction-vs-actual calibration parquet.
+
+    Written by the training pipeline (not yet implemented); callers must check
+    `.exists()` before reading.
+    """
     return models_dir() / "calibration.parquet"
