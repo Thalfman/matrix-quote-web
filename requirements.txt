@@ -17,3 +17,4 @@ python-jose[cryptography]>=3.3
 pydantic-settings>=2.1
 filelock>=3.13
 slowapi>=0.1.9
+shap
