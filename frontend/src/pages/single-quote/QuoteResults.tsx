@@ -166,7 +166,7 @@ function ComparisonChart({
         <YAxis tick={{ fontSize: 11 }} label={{ value: "Hours", angle: -90, position: "insideLeft", offset: 10, fontSize: 11 }} />
         <Tooltip />
         <Legend wrapperStyle={{ fontSize: 11 }} />
-        <Bar dataKey="Recommended" fill="#F5A524" radius={[3, 3, 0, 0]} />
+        <Bar dataKey="Recommended" fill="#2563EB" radius={[3, 3, 0, 0]} />
         <Bar dataKey="Quoted" fill="#60A5FA" radius={[3, 3, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
