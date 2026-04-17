@@ -68,3 +68,28 @@ def test_compute_drivers_graceful_when_one_model_errors(monkeypatch):
     available   = [op for op in result if op.available]
     assert unavailable, "the flaky op should be marked unavailable"
     assert available,   "other ops should still return data"
+
+
+def test_compute_neighbors_returns_up_to_k():
+    from backend.app.explain import compute_neighbors
+
+    result = compute_neighbors(_sample_input(), k=5)
+
+    assert len(result) <= 5
+    for n in result:
+        assert n.project_name
+        assert n.industry_segment
+        assert n.automation_level
+        assert 0.0 <= n.similarity <= 1.0 + 1e-9  # cosine
+        assert n.actual_hours >= 0
+
+
+def test_compute_neighbors_empty_when_master_missing(tmp_path, monkeypatch):
+    monkeypatch.setenv("DATA_DIR", str(tmp_path))  # no master parquet here
+    from importlib import reload
+
+    from backend.app import explain, storage
+    reload(storage); reload(explain)
+
+    result = explain.compute_neighbors(_sample_input(), k=5)
+    assert result == []
