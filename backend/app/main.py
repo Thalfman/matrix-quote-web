@@ -16,7 +16,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .deps import get_settings
 from .paths import ensure_runtime_dirs
-from .routes import admin, metrics, quote
+from .routes import admin, metrics, quote, quotes
 
 
 def create_app() -> FastAPI:
@@ -40,6 +40,7 @@ def create_app() -> FastAPI:
     app.include_router(metrics.router)
     app.include_router(quote.router)
     app.include_router(admin.router)
+    app.include_router(quotes.router)
 
     _mount_frontend(app)
     return app
