@@ -84,3 +84,7 @@ cd frontend && npm test
 4. Deploy — the Dockerfile builds the frontend and serves it alongside the API.
 
 First-use checklist in production: sign in at `/admin/login`, upload a project-hours xlsx on `/admin/train`, wait for the 12 operation models to train. After training completes the `/` Single Quote page becomes usable.
+
+### Single Quote cockpit
+
+The Single Quote page (`/`) uses a two-column CSS-grid workspace on `≥lg` viewports: the quote form on the left, a sticky result panel on the right. On mobile the form stacks above the result. The result panel contains a hero estimate (count-up animation, 5-dot confidence indicator) plus four tabs — Estimate (per-bucket breakdown), Drivers (signed SHAP contributions), Similar (neighbor projects with Δ), and Scenarios (session-only saved quotes). Press `⌘/Ctrl+Enter` from anywhere on the page to submit the form. Scenario persistence and PDF export land in Plans C and D respectively.
