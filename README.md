@@ -181,11 +181,19 @@ First-use checklist in production: sign in at `/admin/login`, upload a project-h
 
 ### Single Quote cockpit
 
-The Single Quote page (`/`) uses a two-column CSS-grid workspace on `≥lg` viewports: the quote form on the left, a sticky result panel on the right. On mobile the form stacks above the result. The result panel contains a hero estimate (count-up animation, 5-dot confidence indicator) plus four tabs — Estimate (per-bucket breakdown), Drivers (signed SHAP contributions), Similar (neighbor projects with Δ), and Scenarios (saved quotes for the current session). Press `⌘/Ctrl+Enter` from anywhere on the page to submit the form.
+The Single Quote page (`/`) uses a two-column CSS-grid workspace on `≥lg` viewports: the quote form on the left, a sticky result panel on the right. On mobile the form stacks above the result. The page header carries the eyebrow `"Estimate · Cockpit"`. The result panel contains:
 
-**Save Scenario flow:** the "Save scenario" button prompts for a name and project name, then calls `POST /api/quotes` and toasts on success. The `created_by` field is populated from the browser display name captured via `frontend/src/lib/displayName.ts` (stored in `localStorage`; the user is prompted once on first save). The "Compare" button navigates to `/quotes` where saved scenarios can be bulk-selected.
+- **HeroEstimate** — count-up animation, amber accent stripe, p10–p90 CI rail, and a 5-pip confidence indicator labeled Weak / Moderate / Strong / Very Strong. A mono `model · current · N ops` strip runs below the hero.
+- **Estimate tab** — per-bucket breakdown with eyebrow operation codes (ME / EE / CON / …), ink bars, and a Hours / % mode toggle.
+- **Drivers tab** — bidirectional amber/teal bars radiating from a center axis with a legend.
+- **Similar tab** — neighbor projects with teal similarity pips and signed amber/teal Δ values.
+- **Scenarios tab** — saved quotes for the current session; the active scenario is ringed in teal, and each row has an outlined Compare pill.
 
-**Export PDF (ad-hoc):** the "Export PDF" button in the cockpit result panel prompts for a project name, then calls `POST /api/quote/pdf` and triggers a browser download — no save required. The PDF is a 3-page Matrix-branded document: cover with headline estimate, per-bucket breakdown + input summary, and assumptions/disclaimers. The WeasyPrint template renders in the Matrix ink/amber/teal palette with JetBrains Mono tabular numerics; see [PDF template](#pdf-template) for details on the Jinja variables.
+Press `⌘/Ctrl+Enter` from anywhere on the page to submit the form; the submit button is labeled "Regenerate estimate". The form submit bar is solid ink with an amber `↵` / `⌘↵` hint.
+
+**Save flow:** the outlined "Save" button in the result panel prompts for a name and project name, then calls `POST /api/quotes` and toasts on success. The `created_by` field is populated from the browser display name captured via `frontend/src/lib/displayName.ts` (stored in `localStorage`; the user is prompted once on first save). The Compare pill in ScenariosTab navigates to `/quotes` where saved scenarios can be bulk-selected.
+
+**Export PDF (ad-hoc):** the solid-teal "Export" button in the result panel prompts for a project name, then calls `POST /api/quote/pdf` and triggers a browser download — no save required. The PDF is a 3-page Matrix-branded document: cover with headline estimate, per-bucket breakdown + input summary, and assumptions/disclaimers. The WeasyPrint template renders in the Matrix ink/amber/teal palette with JetBrains Mono tabular numerics; see [PDF template](#pdf-template) for details on the Jinja variables.
 
 ### Saved Quotes (`/quotes`)
 

@@ -1,3 +1,4 @@
+// Per-bucket breakdown with eyebrow operation codes (ME/EE/CON/…), ink bars, and a Hours/% mode toggle.
 import { useState } from "react";
 import { ExplainedQuoteResponse } from "@/api/types";
 

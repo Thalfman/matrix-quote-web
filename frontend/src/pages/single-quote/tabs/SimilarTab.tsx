@@ -1,3 +1,4 @@
+// Neighbor project rows with teal similarity pips and signed amber/teal hour deltas vs the current estimate.
 import { NeighborProject } from "@/api/types";
 
 function formatHours(n: number): string {

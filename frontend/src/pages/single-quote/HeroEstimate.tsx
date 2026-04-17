@@ -1,3 +1,4 @@
+// Headline p50 estimate with amber stripe, p10–p90 CI rail, confidence pip label (Weak–Very Strong), and model meta strip.
 import { ExplainedQuoteResponse } from "@/api/types";
 import { useCountUp } from "@/lib/useCountUp";
 
