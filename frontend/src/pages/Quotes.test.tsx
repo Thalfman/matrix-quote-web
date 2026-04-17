@@ -91,22 +91,28 @@ describe("Quotes", () => {
     expect(screen.getByText("Option B")).toBeInTheDocument();
   });
 
-  it("Compare button starts disabled, stays disabled with 1 checkbox, enables with 2", async () => {
+  it("bulk bar hidden initially, shows after 1 row selected, Compare → enabled after 2", async () => {
     setupListMock();
 
     renderWithProviders(<Quotes />);
 
     await screen.findByText("Option A");
 
-    const compareBtn = screen.getByRole("button", { name: /Compare/i });
-    expect(compareBtn).toBeDisabled();
+    // Bulk bar is not rendered until at least 1 row is selected.
+    expect(screen.queryByText(/selected/i)).not.toBeInTheDocument();
 
     const checkboxes = screen.getAllByRole("checkbox");
+
+    // Select first row — bar appears, but Compare → still disabled (need 2).
     fireEvent.click(checkboxes[0]);
+    expect(screen.getByText("1 selected")).toBeInTheDocument();
+    const compareBtn = screen.getByRole("button", { name: /Pick 2 or 3 to compare/i });
     expect(compareBtn).toBeDisabled();
 
+    // Select second row — Compare → becomes enabled.
     fireEvent.click(checkboxes[1]);
-    expect(compareBtn).not.toBeDisabled();
+    expect(screen.getByText("2 selected")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Compare →/i })).not.toBeDisabled();
   });
 
   it("PDF row action calls downloadScenarioPdf with the correct row id", async () => {
