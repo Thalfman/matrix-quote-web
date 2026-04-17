@@ -37,3 +37,7 @@ def train_lock_path() -> Path:
 def ensure_runtime_dirs() -> None:
     master_data_path().parent.mkdir(parents=True, exist_ok=True)
     models_dir().mkdir(parents=True, exist_ok=True)
+
+
+def quotes_parquet_path() -> Path:
+    return data_dir() / "data" / "master" / "quotes.parquet"
