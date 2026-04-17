@@ -26,7 +26,7 @@ matrix-quote-web/
 │           ├── metrics.py      # /api/metrics/* — headline + history + calibration + GET /api/demo/status
 │           ├── insights.py     # /api/insights/overview — executive KPI snapshot
 │           └── admin.py        # admin-guarded routes incl. POST /api/admin/demo/load
-├── frontend/        # Vite SPA (Inter font, Matrix navy/electric-blue palette)
+├── frontend/        # Vite SPA (Barlow Condensed + JetBrains Mono + Inter; ink/paper/teal/amber design system)
 ├── demo_assets/     # committed synthetic dataset + pretrained models for demo mode
 │   ├── data/master/projects_master.parquet  # 300-row synthetic master
 │   └── models/     # 12 *.joblib bundles, metrics_summary.csv, metrics_history.parquet, calibration.parquet
