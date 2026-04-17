@@ -4,10 +4,12 @@ import { Layout } from "@/components/Layout";
 import { RequireAdmin } from "@/components/RequireAdmin";
 import { AdminLogin } from "@/pages/AdminLogin";
 import { BatchQuotes } from "@/pages/BatchQuotes";
+import { Compare } from "@/pages/Compare";
 import { DataExplorer } from "@/pages/DataExplorer";
 import { Drivers } from "@/pages/Drivers";
 import { ModelPerformance } from "@/pages/ModelPerformance";
 import { Overview } from "@/pages/Overview";
+import { Quotes } from "@/pages/Quotes";
 import { SingleQuote } from "@/pages/SingleQuote";
 import { UploadTrain } from "@/pages/UploadTrain";
 
@@ -18,6 +20,8 @@ export default function App() {
         <Route index element={<SingleQuote />} />
         <Route path="batch" element={<BatchQuotes />} />
         <Route path="performance" element={<ModelPerformance />} />
+        <Route path="quotes" element={<Quotes />} />
+        <Route path="quotes/compare" element={<Compare />} />
 
         <Route path="admin/login" element={<AdminLogin />} />
         <Route

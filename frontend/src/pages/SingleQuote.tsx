@@ -2,13 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import { api } from "@/api/client";
-import { useDropdowns, useSingleQuote } from "@/api/quote";
+import { downloadAdHocPdf, useDropdowns, useSaveScenario, useSingleQuote } from "@/api/quote";
 import { ExplainedQuoteResponse, HealthResponse } from "@/api/types";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
+import { ensureDisplayName } from "@/lib/displayName";
 import { useHotkey } from "@/lib/useHotkey";
 
 import { ResultPanel } from "./single-quote/ResultPanel";
@@ -29,6 +31,8 @@ export function SingleQuote() {
   });
   const { data: dropdowns } = useDropdowns();
   const mutate = useSingleQuote();
+  const save = useSaveScenario();
+  const navigate = useNavigate();
   const formRef = useRef<HTMLFormElement>(null);
 
   const form = useForm<QuoteFormValues>({
@@ -96,33 +100,61 @@ export function SingleQuote() {
     }
   }
 
-  const onSaveScenario = () => {
+  const onSaveScenario = async () => {
     if (!result) return;
     const name = prompt("Name this scenario", `Scenario ${scenarios.length + 1}`);
     if (!name) return;
-    setScenarios((s) => [
-      ...s,
-      {
-        id: crypto.randomUUID(),
+    const projectName = prompt("Project name", "") ?? "";
+    if (!projectName) return;
+    try {
+      await save.mutateAsync({
         name,
-        createdAt: new Date().toISOString(),
+        project_name: projectName,
+        created_by: ensureDisplayName(),
         inputs: transformToQuoteInput(form.getValues()),
-        result,
-        quotedHoursByBucket,
-      },
-    ]);
-    toast.success(`Saved "${name}" (session)`);
+        prediction: result.prediction,
+        quoted_hours_by_bucket: quotedHoursByBucket as Record<string, number>,
+      });
+      // Keep local session list in sync (Plan B tests rely on this).
+      setScenarios((s) => [
+        ...s,
+        {
+          id: crypto.randomUUID(),
+          name,
+          createdAt: new Date().toISOString(),
+          inputs: transformToQuoteInput(form.getValues()),
+          result,
+          quotedHoursByBucket,
+        },
+      ]);
+      toast.success(`Saved "${name}"`);
+    } catch {
+      toast.error("Could not save scenario");
+    }
   };
 
-  const onExportPdf = () => {
-    toast.info("PDF export lands in Plan D");
+  const onExportPdf = async () => {
+    if (!result) return;
+    const projectName = prompt("Project name for the PDF", "") ?? "";
+    if (!projectName) return;
+    try {
+      await downloadAdHocPdf({
+        name: "Draft",
+        project_name: projectName,
+        created_by: ensureDisplayName(),
+        inputs: transformToQuoteInput(form.getValues()),
+        prediction: result.prediction,
+      });
+    } catch {
+      toast.error("Could not generate PDF");
+    }
   };
 
   const onRemoveScenario = (id: string) =>
     setScenarios((s) => s.filter((x) => x.id !== id));
 
   const onCompare = () => {
-    toast.info("Compare lands in Plan C — will navigate to /quotes/compare");
+    navigate("/quotes");
   };
 
   return (

@@ -1,5 +1,6 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { toast } from "sonner";
 
 import { renderWithProviders } from "@/test/render";
 
@@ -17,10 +18,28 @@ vi.mock("@/api/client", () => {
   };
 });
 
+vi.mock("@/api/quote", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/api/quote")>();
+  return {
+    ...actual,
+    downloadAdHocPdf: vi.fn(),
+  };
+});
+
+vi.mock("sonner", () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+  },
+}));
+
 import { api } from "@/api/client";
+import { downloadAdHocPdf } from "@/api/quote";
 
 const mockGet = vi.mocked(api.get);
 const mockPost = vi.mocked(api.post);
+const mockDownloadAdHocPdf = vi.mocked(downloadAdHocPdf);
 
 // ---------------------------------------------------------------------------
 // Shared fixtures
@@ -103,8 +122,12 @@ describe("SingleQuote", () => {
   afterEach(() => {
     mockGet.mockReset();
     mockPost.mockReset();
+    mockDownloadAdHocPdf.mockReset();
+    vi.mocked(toast.error).mockReset();
+    vi.mocked(toast.success).mockReset();
     vi.restoreAllMocks();
     sessionStorage.clear();
+    localStorage.clear();
   });
 
   it("renders the not-trained empty state when /api/health reports models_ready=false", async () => {
@@ -273,5 +296,77 @@ describe("SingleQuote", () => {
     fireEvent.click(link);
     // Link remains in the DOM (form still has session data).
     expect(screen.getByRole("button", { name: /populate with last quote/i })).toBeInTheDocument();
+  });
+
+  // ---------------------------------------------------------------------------
+  // Export PDF (Plan D)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Helper: render form, submit to get a result, then wait for the Export PDF
+   * button to appear (it's only rendered once result is non-null).
+   */
+  async function renderWithResult() {
+    mockPost.mockResolvedValue({ data: explainedResponse });
+    const rendered = await renderAndWaitForForm();
+    submitForm(rendered.container);
+    await screen.findByText(/ESTIMATED HOURS/i);
+    const exportBtn = await screen.findByRole("button", { name: /export pdf/i });
+    return { ...rendered, exportBtn };
+  }
+
+  it("Export PDF prompts for project name and calls downloadAdHocPdf with correct payload", async () => {
+    // Pre-set display name so ensureDisplayName() doesn't open a second prompt.
+    localStorage.setItem("matrix.displayName", "Test User");
+
+    mockDownloadAdHocPdf.mockResolvedValue(undefined);
+
+    const promptSpy = vi.spyOn(window, "prompt").mockReturnValueOnce("My Project");
+
+    const { exportBtn } = await renderWithResult();
+    fireEvent.click(exportBtn);
+
+    await waitFor(() =>
+      expect(mockDownloadAdHocPdf).toHaveBeenCalledTimes(1),
+    );
+
+    expect(promptSpy).toHaveBeenCalled();
+    const callArg = mockDownloadAdHocPdf.mock.calls[0][0];
+    expect(callArg.name).toBe("Draft");
+    expect(callArg.project_name).toBe("My Project");
+    expect(callArg.created_by).toBe("Test User");
+    expect(callArg.prediction).toEqual(explainedResponse.prediction);
+  });
+
+  it("Export PDF does NOT call downloadAdHocPdf when user cancels the prompt", async () => {
+    localStorage.setItem("matrix.displayName", "Test User");
+
+    mockDownloadAdHocPdf.mockResolvedValue(undefined);
+
+    // Simulate user pressing Cancel (prompt returns null).
+    vi.spyOn(window, "prompt").mockReturnValueOnce(null);
+
+    const { exportBtn } = await renderWithResult();
+    fireEvent.click(exportBtn);
+
+    // Give any async handlers a chance to run.
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(mockDownloadAdHocPdf).not.toHaveBeenCalled();
+  });
+
+  it("Export PDF shows toast.error when downloadAdHocPdf rejects", async () => {
+    localStorage.setItem("matrix.displayName", "Test User");
+
+    mockDownloadAdHocPdf.mockRejectedValue(new Error("500"));
+
+    vi.spyOn(window, "prompt").mockReturnValueOnce("My Project");
+
+    const { exportBtn } = await renderWithResult();
+    fireEvent.click(exportBtn);
+
+    await waitFor(() =>
+      expect(vi.mocked(toast.error)).toHaveBeenCalledWith("Could not generate PDF"),
+    );
   });
 });

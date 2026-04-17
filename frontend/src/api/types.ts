@@ -133,3 +133,37 @@ export type ExplainedQuoteResponse = {
   drivers?: OperationDrivers[] | null;
   neighbors?: NeighborProject[] | null;
 };
+
+export type SavedQuoteCreate = {
+  name: string;
+  project_name: string;
+  client_name?: string | null;
+  notes?: string | null;
+  created_by: string;
+  inputs: QuoteInput;
+  prediction: QuotePrediction;
+  quoted_hours_by_bucket?: Record<string, number> | null;
+};
+
+export type SavedQuote = SavedQuoteCreate & {
+  id: string;
+  created_at: string;
+};
+
+export type SavedQuoteSummary = {
+  id: string;
+  name: string;
+  project_name: string;
+  client_name: string | null;
+  industry_segment: string;
+  hours: number;
+  range_low: number;
+  range_high: number;
+  created_at: string;
+  created_by: string;
+};
+
+export type SavedQuoteList = {
+  total: number;
+  rows: SavedQuoteSummary[];
+};

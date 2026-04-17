@@ -1,7 +1,15 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "./client";
-import { DropdownOptions, ExplainedQuoteResponse, QuoteInput } from "./types";
+import {
+  DropdownOptions,
+  ExplainedQuoteResponse,
+  QuoteInput,
+  QuotePrediction,
+  SavedQuote,
+  SavedQuoteCreate,
+  SavedQuoteList,
+} from "./types";
 
 export function useDropdowns() {
   return useQuery({
@@ -16,4 +24,78 @@ export function useSingleQuote() {
     mutationFn: async (input) =>
       (await api.post<ExplainedQuoteResponse>("/quote/single", input)).data,
   });
+}
+
+export function useSavedQuotes(
+  params: { project?: string; industry?: string; search?: string } = {},
+) {
+  return useQuery<SavedQuoteList>({
+    queryKey: ["savedQuotes", params],
+    queryFn: async () =>
+      (await api.get<SavedQuoteList>("/quotes", { params })).data,
+  });
+}
+
+export function useSavedQuote(id: string | undefined) {
+  return useQuery<SavedQuote>({
+    queryKey: ["savedQuote", id],
+    enabled: !!id,
+    queryFn: async () => (await api.get<SavedQuote>(`/quotes/${id}`)).data,
+  });
+}
+
+export function useSaveScenario() {
+  const qc = useQueryClient();
+  return useMutation<SavedQuote, unknown, SavedQuoteCreate>({
+    mutationFn: async (body) =>
+      (await api.post<SavedQuote>("/quotes", body)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["savedQuotes"] }),
+  });
+}
+
+export function useDeleteScenario() {
+  const qc = useQueryClient();
+  return useMutation<void, unknown, string>({
+    mutationFn: async (id) => {
+      await api.delete(`/quotes/${id}`);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["savedQuotes"] }),
+  });
+}
+
+export function useDuplicateScenario() {
+  const qc = useQueryClient();
+  return useMutation<SavedQuote, unknown, string>({
+    mutationFn: async (id) =>
+      (await api.post<SavedQuote>(`/quotes/${id}/duplicate`)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["savedQuotes"] }),
+  });
+}
+
+async function _streamDownload(resp: { data: Blob }, fallbackName: string) {
+  const url = URL.createObjectURL(resp.data);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fallbackName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+export async function downloadScenarioPdf(id: string): Promise<void> {
+  const resp = await api.get(`/quotes/${id}/pdf`, { responseType: "blob" });
+  _streamDownload(resp as { data: Blob }, `Matrix-Quote-${id}.pdf`);
+}
+
+export async function downloadAdHocPdf(body: {
+  name: string;
+  project_name: string;
+  client_name?: string | null;
+  created_by: string;
+  inputs: QuoteInput;
+  prediction: QuotePrediction;
+}): Promise<void> {
+  const resp = await api.post("/quote/pdf", body, { responseType: "blob" });
+  _streamDownload(resp as { data: Blob }, `Matrix-Quote-${body.project_name.replace(/\s+/g, "-")}.pdf`);
 }

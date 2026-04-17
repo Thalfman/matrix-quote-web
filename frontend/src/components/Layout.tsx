@@ -17,6 +17,10 @@ const PUBLIC_NAV: NavGroup[] = [
     ],
   },
   {
+    label: "QUOTES",
+    items: [{ to: "/quotes", label: "Saved Quotes" }],
+  },
+  {
     label: "INSIGHTS",
     items: [{ to: "/performance", label: "Model Performance" }],
   },
