@@ -1,6 +1,6 @@
 # Matrix Quote Web
 
-Full-stack web application that wraps the Matrix per-operation Gradient Boosting quoting engine from `matrix_quote_app/`. Customer-facing single/batch quote estimator plus a password-protected admin console for training and data exploration.
+Full-stack web application that wraps the Matrix per-operation Gradient Boosting quoting engine from `matrix_quote_app/`. Customer-facing single-quote estimator (with a batch upload shell — inference not yet wired) plus a password-protected admin console for training and data exploration.
 
 ## Stack
 
@@ -167,7 +167,7 @@ Side-by-side view for 2–3 saved scenarios:
 | Path | Component | Description |
 |------|-----------|-------------|
 | `/` | `SingleQuote` | Two-column estimator cockpit |
-| `/batch` | `BatchQuotes` | CSV bulk quoting |
+| `/batch` | `BatchQuotes` | Upload shell: dropzone, CSV schema reference panel, and placeholder recent-batches list (`BatchDropzone`, `BatchSchemaRef`, `BatchRecentList`). Drop/select toasts a stub message; no batch inference endpoint is wired yet. |
 | `/quotes` | `Quotes` | Saved scenarios list |
 | `/quotes/compare` | `Compare` | Side-by-side scenario comparison |
 | `/performance` | `ModelPerformance` | Estimate accuracy dashboard |
