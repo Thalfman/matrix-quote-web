@@ -16,13 +16,17 @@ matrix-quote-web/
 ├── service/         # vendored prediction orchestration — DO NOT EDIT
 ├── backend/         # FastAPI wrapper
 │   └── app/
-│       └── explain.py   # per-quote driver contributions + neighbor search
+│       ├── explain.py          # per-quote driver contributions + neighbor search
+│       ├── quotes_storage.py   # saved-quote CRUD, atomic-replace parquet persistence
+│       └── routes/
+│           └── quotes.py       # /api/quotes CRUD + duplicate endpoints
 ├── frontend/        # Vite SPA (Inter font, Matrix navy/electric-blue palette)
 ├── scripts/         # one-off utilities
 │   └── build_test_fixtures.py   # generate synthetic fixture models (run once)
 ├── tests/           # pytest
 │   └── fixtures/tiny_models/   # checked-in synthetic models for unit tests
-├── data/master/     # runtime: master parquet + upload log (gitignored)
+├── data/master/     # runtime: master parquet + saved quotes parquet (gitignored)
+│   └── quotes.parquet          # persisted saved scenarios (atomic-replace writes)
 ├── models/          # runtime: trained joblib bundles + metrics_summary.csv (gitignored)
 ├── Dockerfile
 ├── railway.json
@@ -47,6 +51,20 @@ API docs at `http://localhost:8000/docs`.
 nested under `body.prediction` (not top-level), and `body.drivers` /
 `body.neighbors` carry per-quote explainability data. Both explain fields
 degrade gracefully to `null` if models don't support SHAP.
+
+### Saved-quotes API
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/quotes` | List saved scenarios (filters: `project`, `industry`, `search`, `limit`, `offset`) |
+| `POST` | `/api/quotes` | Persist a new scenario (`SavedQuoteCreate` body) |
+| `GET` | `/api/quotes/{id}` | Full scenario detail (`SavedQuote`) |
+| `DELETE` | `/api/quotes/{id}` | Remove a scenario (204) |
+| `POST` | `/api/quotes/{id}/duplicate` | Clone a scenario under a new id (201) |
+
+No auth gate on quotes endpoints. `created_by` is a browser-captured display name (stored in `localStorage`) sent with each save.
+
+Scenarios are persisted in `data/master/quotes.parquet`. The `inputs` and `prediction` fields are stored as JSON strings so schema evolution of `QuoteInput` does not churn the parquet schema. Writes use an atomic `os.replace` pattern (write to `quotes.parquet.tmp`, then rename).
 
 ### Frontend
 
@@ -87,4 +105,32 @@ First-use checklist in production: sign in at `/admin/login`, upload a project-h
 
 ### Single Quote cockpit
 
-The Single Quote page (`/`) uses a two-column CSS-grid workspace on `≥lg` viewports: the quote form on the left, a sticky result panel on the right. On mobile the form stacks above the result. The result panel contains a hero estimate (count-up animation, 5-dot confidence indicator) plus four tabs — Estimate (per-bucket breakdown), Drivers (signed SHAP contributions), Similar (neighbor projects with Δ), and Scenarios (session-only saved quotes). Press `⌘/Ctrl+Enter` from anywhere on the page to submit the form. Scenario persistence and PDF export land in Plans C and D respectively.
+The Single Quote page (`/`) uses a two-column CSS-grid workspace on `≥lg` viewports: the quote form on the left, a sticky result panel on the right. On mobile the form stacks above the result. The result panel contains a hero estimate (count-up animation, 5-dot confidence indicator) plus four tabs — Estimate (per-bucket breakdown), Drivers (signed SHAP contributions), Similar (neighbor projects with Δ), and Scenarios (saved quotes for the current session). Press `⌘/Ctrl+Enter` from anywhere on the page to submit the form.
+
+**Save Scenario flow:** the "Save scenario" button prompts for a name and project name, then calls `POST /api/quotes` and toasts on success. The `created_by` field is populated from the browser display name captured via `frontend/src/lib/displayName.ts` (stored in `localStorage`; the user is prompted once on first save). The "Compare" button navigates to `/quotes` where saved scenarios can be bulk-selected.
+
+### Saved Quotes (`/quotes`)
+
+Filterable, searchable list of all persisted scenarios. Columns: name, project, industry, hours (p50), range (p10–p90), saved-at. Filters: project dropdown, industry dropdown, free-text search. Bulk-select 2–3 rows to enable the "Compare selected" button. Per-row actions: Duplicate, Delete.
+
+### Compare (`/quotes/compare?ids=a,b[,c]`)
+
+Side-by-side view for 2–3 saved scenarios:
+
+- Headline hours, range, confidence, and Δ vs the first column.
+- Grouped bar chart of per-bucket hours across all scenarios (Recharts).
+- Input-diff table showing only fields that differ between scenarios.
+- Drivers strip (placeholder until drivers are persisted with each saved quote in a follow-up).
+
+### Frontend routes
+
+| Path | Component | Description |
+|------|-----------|-------------|
+| `/` | `SingleQuote` | Two-column estimator cockpit |
+| `/batch` | `BatchQuotes` | CSV bulk quoting |
+| `/quotes` | `Quotes` | Saved scenarios list |
+| `/quotes/compare` | `Compare` | Side-by-side scenario comparison |
+| `/performance` | `ModelPerformance` | Estimate accuracy dashboard |
+| `/admin/*` | Admin pages | Upload, train, data explorer (auth-gated) |
+
+PDF export (`/api/quotes/{id}/pdf`, `POST /api/quote/pdf`) lands in Plan D.
