@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-import { useDeleteScenario, useDuplicateScenario, useSavedQuotes } from "@/api/quote";
+import { downloadScenarioPdf, useDeleteScenario, useDuplicateScenario, useSavedQuotes } from "@/api/quote";
 import { PageHeader } from "@/components/PageHeader";
 
 import { QuotesFilters } from "./quotes/QuotesFilters";
@@ -88,7 +88,11 @@ export function Quotes() {
               await del.mutateAsync(id);
               toast.success("Deleted");
             } else if (action === "pdf") {
-              toast.info("PDF export lands in Plan D");
+              try {
+                await downloadScenarioPdf(id);
+              } catch {
+                toast.error("Could not generate PDF");
+              }
             } else if (action === "open") {
               toast.info("Opening saved quotes in the cockpit lands in a follow-up");
             }

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import { api } from "@/api/client";
-import { useDropdowns, useSaveScenario, useSingleQuote } from "@/api/quote";
+import { downloadAdHocPdf, useDropdowns, useSaveScenario, useSingleQuote } from "@/api/quote";
 import { ExplainedQuoteResponse, HealthResponse } from "@/api/types";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
@@ -133,8 +133,21 @@ export function SingleQuote() {
     }
   };
 
-  const onExportPdf = () => {
-    toast.info("PDF export lands in Plan D");
+  const onExportPdf = async () => {
+    if (!result) return;
+    const projectName = prompt("Project name for the PDF", "") ?? "";
+    if (!projectName) return;
+    try {
+      await downloadAdHocPdf({
+        name: "Draft",
+        project_name: projectName,
+        created_by: ensureDisplayName(),
+        inputs: transformToQuoteInput(form.getValues()),
+        prediction: result.prediction,
+      });
+    } catch {
+      toast.error("Could not generate PDF");
+    }
   };
 
   const onRemoveScenario = (id: string) =>
