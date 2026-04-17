@@ -162,6 +162,14 @@ Side-by-side view for 2–3 saved scenarios:
 - Input-diff table showing only fields that differ between scenarios.
 - Drivers strip (placeholder until drivers are persisted with each saved quote in a follow-up).
 
+### Executive Overview (`/insights`)
+
+Four KPI cards rendered with display-hero numerics (Barlow Condensed, large weight): Active Quotes, Model Readiness, Overall MAPE, and Confidence Calibration. The Overall MAPE and Confidence Calibration cards carry an amber left-border stripe to draw attention to the accuracy signals. Below the cards, a `QuotesActivityChart` renders 26 weeks of quote volume as ink-filled bars with the current week highlighted in amber. A `LatestQuotesTable` shows the five most recent saved quotes in a grid-row layout with mono tnum columns for hours and range. An `AccuracyHeatmap` presents per-operation MAPE in a teal-tint ramp (low error = light teal, high error = deep teal) with mono axis labels. Each visual group is introduced by an eyebrow section label (small-caps, spaced tracking).
+
+### Estimate Accuracy (`/performance`)
+
+`HeadlineKPIs` repeats the Overall MAPE card with its amber stripe alongside Calibration Band %. `MapeByOperation` renders per-operation MAPE as a horizontal bar chart in ink with mono axis labels — the bar fill is uniform ink, not color-coded, so the length alone encodes magnitude. `CalibrationScatter` plots predicted-vs-actual hours as a scatter with a `y=x` reference line (dashed amber); dots above the line are teal (over-estimate) and dots below are rose/danger (under-estimate). `TrainingHistoryChart` shows MAPE over training runs as a teal line chart with an amber hover dot; its eyebrow reads "MAPE · over time" (not "Training history", which is reserved for the outer section label). All four charts share a common `chartTheme.ts` that exports palette constants and axis defaults to keep the two dashboards visually consistent.
+
 ### Frontend routes
 
 | Path | Component | Description |
