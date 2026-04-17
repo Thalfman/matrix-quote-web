@@ -1,5 +1,19 @@
 # Plan F — Demo Mode & Nav Polish
 
+> **Status: Shipped 2026-04-17** (branch `feat/scaffold-and-single-quote`).
+
+## Post-implementation drift
+
+Five deviations from the plan body, recorded for reference:
+
+1. **`generate_demo_assets.py` training path corrected.** Plan called `service.train_lib.train_all_operations` — that module does not exist. Replaced with a `core.models.train_one_op` loop over `core.config.TARGETS`, matching the pattern already established in `scripts/build_test_fixtures.py`.
+2. **`inside_band` column added to `calibration.parquet`.** `backend/app/insights.py::calibration_within_band_pct` requires this column to compute the KPI; plan's `write_calibration` omitted it.
+3. **TARGETS codes used in `metrics_history.parquet`.** The `operation` column uses actual TARGETS codes (e.g. `me10_actual_hours`) rather than the plan's friendly labels (`mechanical_hours`), so the accuracy heatmap in `insights.py` matches what a real training run produces.
+4. **`UserPill` uses `getDisplayName()` on mount, not `ensureDisplayName()`.** Using `ensureDisplayName()` would auto-prompt every user on every page load. Changed to read silently on mount and prompt only on click.
+5. **`Layout.tsx` gained a minimal mobile top bar.** The plan wired chip + pill only into the desktop row; a lightweight mobile top bar (brand text + chip + pill, no hamburger) was also added so the demo chip is visible on small viewports.
+
+---
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Enable a one-command demo (`ENABLE_DEMO=1`) that seeds `DATA_DIR` with a synthetic dataset + pretrained models so every screen is demoable without a real client dataset. Add a user pill and demo-mode chip to the global layout. Add an admin "Load demo data" button that also triggers the seed at runtime (refuses if real data is present).

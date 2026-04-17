@@ -281,6 +281,8 @@ Server-side render via **WeasyPrint** (BSD-3, pure-Python frontend, renders HTML
 
 ## 9. Demo mode
 
+> **Status: Shipped 2026-04-17** (branch `feat/scaffold-and-single-quote`, Plan F).
+
 Lets the app boot with a working Single Quote flow, saved-quotes list, PDFs, and dashboards, with no real dataset.
 
 ### Mechanism
@@ -298,6 +300,14 @@ Lets the app boot with a working Single Quote flow, saved-quotes list, PDFs, and
 - Local dev: `ENABLE_DEMO=1 uvicorn ...` → instant.
 - Railway staging / client demo URL: same env var.
 - Railway production: `ENABLE_DEMO` unset; behavior unchanged.
+
+### As-shipped implementation details
+
+- **Endpoints:** `GET /api/demo/status` (public, mounted on the metrics router); `POST /api/admin/demo/load` (admin-guarded, on the admin router).
+- **Status file:** `DATA_DIR/status.json` — written by `demo._write_status()`; read by `demo.read_status()`.
+- **Committed assets tree:** `demo_assets/` — `data/master/projects_master.parquet` (300 rows), `models/*.joblib` (12 ops), `models/metrics_summary.csv`, `models/metrics_history.parquet` (54 rows: 6 run-level + 12 ops × 4 quarters), `models/calibration.parquet` (120 rows with `inside_band` column).
+- **Startup hook:** `demo.seed_if_enabled()` called inside `create_app()` after `ensure_runtime_dirs()` in `backend/app/main.py`.
+- **Training in `generate_demo_assets.py`:** uses `core.models.train_one_op` loop over `core.config.TARGETS` (plan originally referenced nonexistent `service.train_lib.train_all_operations`).
 
 ---
 

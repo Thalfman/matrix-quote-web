@@ -9,6 +9,11 @@ Outputs (checked in):
     demo_assets/models/*.joblib
     demo_assets/models/metrics_history.parquet
     demo_assets/models/calibration.parquet
+
+Training uses core.models.train_one_op in a loop over core.config.TARGETS — the
+same pattern as scripts/build_test_fixtures.py. The original plan referenced
+service.train_lib.train_all_operations which does not exist; train_one_op is the
+correct entry point into the vendored ML library.
 """
 
 from __future__ import annotations
