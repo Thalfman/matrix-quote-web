@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 import pytest
@@ -89,7 +88,8 @@ def test_compute_neighbors_empty_when_master_missing(tmp_path, monkeypatch):
     from importlib import reload
 
     from backend.app import explain, storage
-    reload(storage); reload(explain)
+    reload(storage)
+    reload(explain)
 
     result = explain.compute_neighbors(_sample_input(), k=5)
     assert result == []

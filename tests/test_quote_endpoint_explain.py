@@ -5,7 +5,6 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-
 FIXTURE_DIR = Path(__file__).parent / "fixtures" / "tiny_models"
 FIXTURE_MODELS_DIR = str(FIXTURE_DIR / "models")
 

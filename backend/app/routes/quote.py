@@ -5,10 +5,9 @@ from __future__ import annotations
 import io
 
 import pandas as pd
+from core.config import QUOTE_CAT_FEATURES, QUOTE_NUM_FEATURES
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import StreamingResponse
-
-from core.config import QUOTE_CAT_FEATURES, QUOTE_NUM_FEATURES
 from service.predict_lib import predict_quote, predict_quotes_df
 
 from .. import storage

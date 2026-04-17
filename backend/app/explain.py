@@ -15,7 +15,6 @@ from typing import Any
 import joblib
 import numpy as np
 import pandas as pd
-
 from core.config import QUOTE_CAT_FEATURES, QUOTE_NUM_FEATURES
 
 from . import storage
@@ -146,7 +145,7 @@ def _contributions_for_op(
         )
 
     pairs = sorted(
-        zip(feature_names, contrib_vec),
+        zip(feature_names, contrib_vec, strict=False),
         key=lambda p: abs(p[1]),
         reverse=True,
     )[:top_n]
