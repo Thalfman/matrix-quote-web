@@ -27,7 +27,7 @@ describe("MapeByOperation", () => {
       { target: "welding_hours", mae: 5.2, r2: 0.9, rows: 50, version: null, model_path: null },
     ];
     renderWithProviders(<MapeByOperation rows={rows} />);
-    expect(screen.getByText(/mae by operation/i)).toBeInTheDocument();
+    expect(screen.getByText(/mae.*by operation/i)).toBeInTheDocument();
   });
 
   it("renders MAPE label when rows have a mape field", () => {
@@ -35,6 +35,6 @@ describe("MapeByOperation", () => {
       { target: "welding_hours", mae: 5.2, r2: 0.9, rows: 50, version: null, model_path: null, mape: 12.4 } as unknown as import("@/api/types").MetricRow,
     ];
     renderWithProviders(<MapeByOperation rows={rows} />);
-    expect(screen.getByText(/mape by operation/i)).toBeInTheDocument();
+    expect(screen.getByText(/mape.*by operation/i)).toBeInTheDocument();
   });
 });

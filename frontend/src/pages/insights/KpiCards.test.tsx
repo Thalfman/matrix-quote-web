@@ -8,9 +8,11 @@ import { KpiCards } from "./KpiCards";
 describe("KpiCards", () => {
   it("renders zero/dash values when data is undefined (loading state)", () => {
     renderWithProviders(<KpiCards data={undefined} />);
-    expect(screen.getByText(/active quotes \(30d\)/i)).toBeInTheDocument();
-    // Models trained shows "0/12"
-    expect(screen.getByText("0/12")).toBeInTheDocument();
+    expect(screen.getByText(/active quotes/i)).toBeInTheDocument();
+    // Models trained shows separate value span and suffix "/ 12"
+    // (active_quotes_30d also renders "0" so use getAllByText)
+    expect(screen.getAllByText("0").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("/ 12")).toBeInTheDocument();
     // Overall MAPE and calibration show em-dashes
     const dashes = screen.getAllByText("—");
     expect(dashes.length).toBeGreaterThanOrEqual(2);
@@ -31,14 +33,15 @@ describe("KpiCards", () => {
     };
     renderWithProviders(<KpiCards data={data} />);
     expect(screen.getByText("7")).toBeInTheDocument();
-    expect(screen.getByText("8/12")).toBeInTheDocument();
+    expect(screen.getByText("8")).toBeInTheDocument();
+    expect(screen.getByText("/ 12")).toBeInTheDocument();
     expect(screen.getByText("13.6")).toBeInTheDocument();
     expect(screen.getByText("82.5")).toBeInTheDocument();
   });
 
   it("renders all four card labels", () => {
     renderWithProviders(<KpiCards data={undefined} />);
-    expect(screen.getByText(/active quotes \(30d\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/active quotes/i)).toBeInTheDocument();
     expect(screen.getByText(/models trained/i)).toBeInTheDocument();
     expect(screen.getByText(/overall mape/i)).toBeInTheDocument();
     expect(screen.getByText(/confidence calibration/i)).toBeInTheDocument();

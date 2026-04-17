@@ -23,7 +23,7 @@ export function TrainingHistoryChart({ rows }: { rows: TrainingRunRow[] }) {
 
   return (
     <div className="card p-4 h-72">
-      <div className="eyebrow text-[10px] text-muted mb-2">Training history</div>
+      <div className="eyebrow text-[10px] text-muted mb-2">MAPE · over time</div>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
           <CartesianGrid {...GRID_STYLE} vertical={false} />

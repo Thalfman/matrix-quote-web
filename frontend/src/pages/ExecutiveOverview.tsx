@@ -12,14 +12,28 @@ export function ExecutiveOverview() {
   return (
     <>
       <PageHeader
-        eyebrow="Insights"
+        eyebrow="Insights · Executive"
         title="Executive Overview"
         description="Pipeline activity, model accuracy, and per-operation trends at a glance."
       />
-      <div className="mt-6 space-y-6">
+
+      <div className="mb-6">
         <KpiCards data={data} />
-        <QuotesActivityChart rows={data?.quotes_activity ?? []} />
-        <LatestQuotesTable rows={data?.latest_quotes ?? []} />
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-6 mb-6">
+        <div>
+          <div className="eyebrow text-[10px] text-muted mb-2">Pipeline activity</div>
+          <QuotesActivityChart rows={data?.quotes_activity ?? []} />
+        </div>
+        <div>
+          <div className="eyebrow text-[10px] text-muted mb-2">Latest saved</div>
+          <LatestQuotesTable rows={data?.latest_quotes ?? []} />
+        </div>
+      </div>
+
+      <div>
+        <div className="eyebrow text-[10px] text-muted mb-2">Accuracy heatmap</div>
         <AccuracyHeatmap
           operations={data?.operations ?? []}
           quarters={data?.quarters ?? []}

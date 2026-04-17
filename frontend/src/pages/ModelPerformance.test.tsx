@@ -104,7 +104,7 @@ describe("ModelPerformance", () => {
     expect(screen.getByText("68.3%")).toBeInTheDocument();
     expect(screen.getByText("89.1%")).toBeInTheDocument();
     // MAPE by operation chart heading
-    expect(screen.getByText(/mae by operation/i)).toBeInTheDocument();
+    expect(screen.getByText(/mae.*by operation/i)).toBeInTheDocument();
     // Calibration and history chart headings
     expect(screen.getByText(/confidence calibration/i)).toBeInTheDocument();
     expect(screen.getByText(/training history/i)).toBeInTheDocument();

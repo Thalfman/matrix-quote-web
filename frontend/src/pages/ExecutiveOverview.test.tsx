@@ -84,7 +84,7 @@ describe("ExecutiveOverview", () => {
     await waitFor(() =>
       expect(screen.getByText(/executive overview/i)).toBeInTheDocument(),
     );
-    expect(screen.getByText("0/12")).toBeInTheDocument();
+    expect(screen.getByText("/ 12")).toBeInTheDocument();
     expect(screen.getByText(/no saved quotes yet/i)).toBeInTheDocument();
     expect(screen.getByText(/accuracy heatmap populates once/i)).toBeInTheDocument();
   });
@@ -99,7 +99,8 @@ describe("ExecutiveOverview", () => {
     await waitFor(() =>
       expect(screen.getByText("5")).toBeInTheDocument(),
     );
-    expect(screen.getByText("8/12")).toBeInTheDocument();
+    expect(screen.getByText("8")).toBeInTheDocument();
+    expect(screen.getByText("/ 12")).toBeInTheDocument();
     expect(screen.getByText("13.6")).toBeInTheDocument();
     expect(screen.getByText("82.5")).toBeInTheDocument();
     expect(screen.getByText("Line 3")).toBeInTheDocument();
