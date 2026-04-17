@@ -20,7 +20,7 @@ export function DriversTab({ drivers }: { drivers: OperationDrivers[] | null | u
 
   if (!drivers || drivers.length === 0) {
     return (
-      <div className="text-sm text-muted">
+      <div className="text-sm text-muted dark:text-muted-dark">
         Driver analysis is not available for this estimate.
       </div>
     );
@@ -35,14 +35,14 @@ export function DriversTab({ drivers }: { drivers: OperationDrivers[] | null | u
   const max = Math.max(1, ...displayed.map((d) => Math.abs(d.contribution)));
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="flex items-center gap-2 text-sm">
-        <label className="text-muted" htmlFor="op-select">Operation</label>
+        <label className="text-muted dark:text-muted-dark" htmlFor="op-select">Operation</label>
         <select
           id="op-select"
           value={selected}
           onChange={(e) => setSelected(e.target.value)}
-          className="bg-surface dark:bg-surface-dark border border-border rounded-md px-2 py-1 text-sm"
+          className="bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-md px-2 py-1 text-sm text-ink dark:text-ink-dark"
         >
           <option value="__all__">All</option>
           {available.map((d) => (
@@ -53,22 +53,25 @@ export function DriversTab({ drivers }: { drivers: OperationDrivers[] | null | u
         </select>
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         {displayed.map((d, i) => {
           const pct = (Math.abs(d.contribution) / max) * 50;
           const isPositive = d.contribution > 0;
           return (
             <div key={`${d.feature}-${i}`} className="flex items-center gap-2 text-sm">
-              <div className="w-48 text-ink truncate" title={`${d.feature}: ${d.value}`}>
+              <div
+                className="w-48 text-ink dark:text-ink-dark truncate"
+                title={d.value ? `${d.feature}: ${d.value}` : d.feature}
+              >
                 {d.feature}
-                {d.value && <span className="text-muted"> · {d.value}</span>}
+                {d.value && <span className="text-muted dark:text-muted-dark"> · {d.value}</span>}
               </div>
-              <div className="numeric tabular-nums w-16 text-right text-ink">
+              <div className="numeric w-16 text-right text-ink dark:text-ink-dark">
                 {formatSigned(d.contribution)} hrs
               </div>
-              <div className="flex-1 relative h-2 bg-steel-100 rounded-full">
+              <div className="flex-1 relative h-2 bg-steel-100 dark:bg-steel-700/40 rounded-full">
                 <span
-                  className="absolute top-0 h-2 w-px bg-steel-300"
+                  className="absolute top-[-2px] bottom-[-2px] w-px bg-steel-400 dark:bg-steel-500"
                   style={{ left: "50%" }}
                   aria-hidden="true"
                 />
@@ -88,12 +91,12 @@ export function DriversTab({ drivers }: { drivers: OperationDrivers[] | null | u
           );
         })}
         {displayed.length === 0 && (
-          <div className="text-sm text-muted">No drivers to show.</div>
+          <div className="text-sm text-muted dark:text-muted-dark">No drivers to show.</div>
         )}
       </div>
 
       {available.length < drivers.length && (
-        <div className="text-xs text-muted">
+        <div className="text-xs text-muted dark:text-muted-dark">
           Some operations did not return drivers for this quote.
         </div>
       )}

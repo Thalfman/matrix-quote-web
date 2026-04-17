@@ -38,13 +38,15 @@ export function QuoteForm({ dropdowns, submitting, onSubmit, form, formRef }: Pr
   return (
     <form ref={formRef} onSubmit={fire}>
       {_hasLastValues() && (
-        <button
-          type="button"
-          onClick={() => form.reset(_readLastValues())}
-          className="text-xs text-brand hover:underline"
-        >
-          Populate with last quote
-        </button>
+        <div className="mb-4 flex justify-end">
+          <button
+            type="button"
+            onClick={() => form.reset(_readLastValues())}
+            className="text-xs text-brand hover:text-brand-hover hover:underline underline-offset-2 transition-colors"
+          >
+            Populate with last quote
+          </button>
+        </div>
       )}
       <Section step="01" title="Project classification" description="Segment, system type, and project flags">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -340,7 +342,7 @@ export function QuoteForm({ dropdowns, submitting, onSubmit, form, formRef }: Pr
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-md bg-accent text-accent-foreground px-6 py-2.5 font-medium disabled:opacity-50"
+          className="rounded-md bg-brand text-brand-foreground px-6 py-2.5 text-sm font-medium hover:bg-brand-hover active:bg-brand-pressed transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-brand"
         >
           {submitting ? "Estimating..." : "Estimate hours"}
         </button>
@@ -350,10 +352,21 @@ export function QuoteForm({ dropdowns, submitting, onSubmit, form, formRef }: Pr
             reset();
             setQuotedHours({});
           }}
-          className="text-sm muted hover:text-ink dark:hover:text-ink-dark"
+          className="text-sm muted hover:text-ink dark:hover:text-ink-dark transition-colors"
         >
           Reset form
         </button>
+        <span className="ml-auto hidden md:block text-xs text-muted dark:text-muted-dark">
+          Press{" "}
+          <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded border border-border dark:border-border-dark bg-bg dark:bg-bg-dark">
+            Ctrl
+          </kbd>
+          +
+          <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded border border-border dark:border-border-dark bg-bg dark:bg-bg-dark">
+            Enter
+          </kbd>{" "}
+          to submit
+        </span>
       </div>
     </form>
   );

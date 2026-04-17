@@ -33,8 +33,10 @@ export function ResultPanel({
         <div className="text-[10px] tracking-widest text-muted font-semibold">
           RESULTS
         </div>
-        <p className="mt-3 text-ink">Fill the form and generate an estimate.</p>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-3 text-ink dark:text-ink-dark">
+          Fill the form and generate an estimate.
+        </p>
+        <p className="mt-1 text-sm text-muted dark:text-muted-dark">
           You'll see confidence intervals, drivers, and similar past projects here.
         </p>
       </div>
@@ -50,21 +52,21 @@ export function ResultPanel({
         onRemoveScenario={onRemoveScenario}
         onCompare={onCompare}
       />
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <button
           type="button"
           onClick={onSaveScenario}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-brand text-brand-foreground text-sm font-medium hover:bg-brand-hover transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-brand text-brand-foreground text-sm font-medium hover:bg-brand-hover active:bg-brand-pressed transition-colors"
         >
-          <Save size={16} strokeWidth={1.75} />
+          <Save size={16} strokeWidth={1.75} aria-hidden="true" />
           Save scenario
         </button>
         <button
           type="button"
           onClick={onExportPdf}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-border text-ink text-sm font-medium hover:bg-steel-100 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-border dark:border-border-dark text-ink dark:text-ink-dark text-sm font-medium hover:bg-steel-100 dark:hover:bg-surface-dark/60 transition-colors"
         >
-          <Download size={16} strokeWidth={1.75} />
+          <Download size={16} strokeWidth={1.75} aria-hidden="true" />
           Export PDF
         </button>
       </div>

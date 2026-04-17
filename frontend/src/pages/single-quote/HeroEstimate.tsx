@@ -32,13 +32,13 @@ export function HeroEstimate({ result }: { result: ExplainedQuoteResponse }) {
       <div className="text-[10px] tracking-widest text-muted font-semibold">
         ESTIMATED HOURS
       </div>
-      <div className="mt-2 font-sans text-display numeric tabular-nums leading-none text-ink">
+      <div className="mt-2 text-display numeric leading-none text-ink">
         {formatHours(animated)}
       </div>
       <div className="mt-3 text-sm text-muted">
         Range {formatHours(low)} – {formatHours(high)} · 90% CI
       </div>
-      <div className="mt-2 flex items-center gap-2 text-sm">
+      <div className="mt-3 flex items-center gap-2.5 text-sm">
         <span className="text-muted">Confidence</span>
         <span aria-hidden="true" className="flex gap-1">
           {[1, 2, 3, 4, 5].map((i) => (
@@ -46,7 +46,7 @@ export function HeroEstimate({ result }: { result: ExplainedQuoteResponse }) {
               key={i}
               className={
                 "w-1.5 h-1.5 rounded-full " +
-                (i <= dots ? "bg-brand" : "bg-steel-200")
+                (i <= dots ? "bg-brand" : "bg-steel-300 dark:bg-steel-600")
               }
             />
           ))}

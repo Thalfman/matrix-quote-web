@@ -31,7 +31,10 @@ export function ResultTabs({
 
   return (
     <div className="card">
-      <div role="tablist" className="flex border-b border-border">
+      <div
+        role="tablist"
+        className="flex border-b border-border dark:border-border-dark px-1 sm:px-2"
+      >
         {TABS.map((t) => {
           const selected = active === t.id;
           return (
@@ -41,15 +44,18 @@ export function ResultTabs({
               aria-selected={selected}
               onClick={() => setActive(t.id)}
               className={
-                "px-4 py-2.5 text-sm transition-colors " +
+                "inline-flex items-center gap-1.5 px-3 sm:px-4 py-2.5 text-sm transition-colors border-b-2 -mb-px " +
                 (selected
-                  ? "text-ink font-semibold border-b-2 border-brand -mb-px"
-                  : "text-muted hover:text-ink")
+                  ? "text-ink dark:text-ink-dark font-semibold border-brand"
+                  : "text-muted dark:text-muted-dark border-transparent hover:text-ink dark:hover:text-ink-dark")
               }
             >
-              {t.label}
+              <span>{t.label}</span>
               {t.id === "scenarios" && scenarios.length > 0 && (
-                <span className="ml-1.5 text-[10px] bg-brand text-brand-foreground rounded-full px-1.5 py-0.5">
+                <span
+                  aria-label={`${scenarios.length} saved`}
+                  className="inline-flex items-center justify-center min-w-[1.25rem] h-5 text-[10px] font-medium bg-brand text-brand-foreground rounded-full px-1.5 leading-none"
+                >
                   {scenarios.length}
                 </span>
               )}
