@@ -1,4 +1,3 @@
-// frontend/src/pages/single-quote/ResultPanel.tsx
 import { Download, Save } from "lucide-react";
 import { ExplainedQuoteResponse } from "@/api/types";
 import { HeroEstimate } from "./HeroEstimate";
@@ -30,18 +29,18 @@ export function ResultPanel({
   if (!result) {
     return (
       <div className="card p-8">
-        <div className="text-[10px] tracking-widest text-muted font-semibold">
-          RESULTS
-        </div>
-        <p className="mt-3 text-ink dark:text-ink-dark">
+        <div className="eyebrow text-[11px] text-muted">Results</div>
+        <p className="display-hero text-xl mt-3 text-ink">
           Fill the form and generate an estimate.
         </p>
-        <p className="mt-1 text-sm text-muted dark:text-muted-dark">
+        <p className="mt-1 text-sm text-muted">
           You'll see confidence intervals, drivers, and similar past projects here.
         </p>
       </div>
     );
   }
+
+  const opsCount = result.drivers?.filter((d) => d.available).length ?? 0;
 
   return (
     <div className="space-y-4" id="quote-results">
@@ -52,11 +51,11 @@ export function ResultPanel({
         onRemoveScenario={onRemoveScenario}
         onCompare={onCompare}
       />
-      <div className="flex flex-wrap gap-2">
+      <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={onSaveScenario}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-teal text-white text-sm font-medium hover:bg-tealDark active:bg-tealDark transition-colors"
+          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-surface border border-ink text-ink text-sm font-medium rounded-sm hover:bg-ink hover:text-white transition-colors"
         >
           <Save size={16} strokeWidth={1.75} aria-hidden="true" />
           Save scenario
@@ -64,11 +63,15 @@ export function ResultPanel({
         <button
           type="button"
           onClick={onExportPdf}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-border text-ink text-sm font-medium hover:bg-paper transition-colors"
+          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-teal text-white text-sm font-medium rounded-sm hover:bg-tealDark transition-colors"
         >
           <Download size={16} strokeWidth={1.75} aria-hidden="true" />
           Export PDF
         </button>
+      </div>
+      <div className="flex items-center justify-between text-[11px] text-muted mono px-1">
+        <span>model · current</span>
+        <span>{opsCount} ops</span>
       </div>
     </div>
   );
