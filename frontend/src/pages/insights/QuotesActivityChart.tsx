@@ -40,19 +40,21 @@ export function QuotesActivityChart({ rows }: { rows: [string, number][] }) {
               dataKey="count"
               radius={[1, 1, 0, 0]}
               fill={CHART_COLORS.ink}
-              // Recharts lets a function set per-cell fill:
-              shape={(props: {
-                x: number; y: number; width: number; height: number; index: number;
-              }) => (
-                <rect
-                  x={props.x}
-                  y={props.y}
-                  width={props.width}
-                  height={props.height}
-                  fill={props.index === lastIndex ? CHART_COLORS.amber : CHART_COLORS.ink}
-                  rx={1}
-                />
-              )}
+              shape={(props: unknown) => {
+                const p = props as {
+                  x: number; y: number; width: number; height: number; index: number;
+                };
+                return (
+                  <rect
+                    x={p.x}
+                    y={p.y}
+                    width={p.width}
+                    height={p.height}
+                    fill={p.index === lastIndex ? CHART_COLORS.amber : CHART_COLORS.ink}
+                    rx={1}
+                  />
+                );
+              }}
             />
           </BarChart>
         </ResponsiveContainer>
