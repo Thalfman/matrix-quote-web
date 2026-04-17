@@ -116,8 +116,8 @@ describe("Quotes", () => {
     renderWithProviders(<Quotes />);
     await screen.findByText("Option A");
 
-    // Click the PDF button on the first row (id = "a").
-    const pdfButtons = screen.getAllByRole("button", { name: /^PDF$/i });
+    // Click the Export PDF button on the first row (id = "a").
+    const pdfButtons = screen.getAllByRole("button", { name: /^Export PDF$/i });
     fireEvent.click(pdfButtons[0]);
 
     await waitFor(() =>
@@ -132,7 +132,7 @@ describe("Quotes", () => {
     renderWithProviders(<Quotes />);
     await screen.findByText("Option A");
 
-    const pdfButtons = screen.getAllByRole("button", { name: /^PDF$/i });
+    const pdfButtons = screen.getAllByRole("button", { name: /^Export PDF$/i });
     fireEvent.click(pdfButtons[0]);
 
     await waitFor(() =>

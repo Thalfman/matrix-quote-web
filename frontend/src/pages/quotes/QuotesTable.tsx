@@ -1,7 +1,19 @@
+import { Download, Copy, Trash2, MoreVertical } from "lucide-react";
+
 import { SavedQuoteSummary } from "@/api/types";
 
 function formatHours(n: number): string {
   return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(n);
+}
+
+function confidenceDots(row: SavedQuoteSummary): number {
+  if (row.hours <= 0) return 1;
+  const rel = (row.range_high - row.range_low) / row.hours;
+  if (rel <= 0.10) return 5;
+  if (rel <= 0.20) return 4;
+  if (rel <= 0.35) return 3;
+  if (rel <= 0.55) return 2;
+  return 1;
 }
 
 type Props = {
@@ -14,77 +26,108 @@ type Props = {
 export function QuotesTable({ rows, selected, onToggle, onRowAction }: Props) {
   return (
     <div className="card overflow-hidden">
-      <table className="w-full text-sm">
-        <thead className="border-b border-border">
-          <tr className="text-left text-xs uppercase tracking-wide text-muted">
-            <th className="px-3 py-2 w-8" />
-            <th className="px-3 py-2">Name</th>
-            <th className="px-3 py-2">Project</th>
-            <th className="px-3 py-2">Industry</th>
-            <th className="px-3 py-2 text-right">Hours</th>
-            <th className="px-3 py-2">Range</th>
-            <th className="px-3 py-2">Saved</th>
-            <th className="px-3 py-2" />
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.id} className="border-b last:border-0 border-border hover:bg-paper/60">
-              <td className="px-3 py-2">
-                <input
-                  type="checkbox"
-                  checked={selected.has(r.id)}
-                  onChange={() => onToggle(r.id)}
-                  aria-label={`Select ${r.name}`}
-                />
-              </td>
-              <td className="px-3 py-2 font-medium text-ink">
-                <button onClick={() => onRowAction(r.id, "open")} className="hover:underline">
+      <div
+        className="grid items-center gap-3 px-4 py-2.5 bg-paper/60 border-b hairline"
+        style={{ gridTemplateColumns: "32px 2fr 1.5fr 100px 140px 120px 110px 40px" }}
+      >
+        {[
+          "", "Project", "Industry", "Hours", "Range", "Confidence", "Saved", "",
+        ].map((h, i) => (
+          <div key={i} className="eyebrow text-[10px] text-muted">{h}</div>
+        ))}
+      </div>
+
+      {rows.length === 0 ? (
+        <div className="px-4 py-8 text-center text-sm text-muted">No saved quotes yet.</div>
+      ) : (
+        rows.map((r) => {
+          const dots = confidenceDots(r);
+          const isSel = selected.has(r.id);
+          return (
+            <div
+              key={r.id}
+              className={
+                "grid items-center gap-3 px-4 py-3 border-b hairline last:border-b-0 group transition-colors " +
+                (isSel ? "bg-tealSoft/40" : "hover:bg-paper/80")
+              }
+              style={{ gridTemplateColumns: "32px 2fr 1.5fr 100px 140px 120px 110px 40px" }}
+            >
+              <input
+                type="checkbox"
+                checked={isSel}
+                onChange={() => onToggle(r.id)}
+                aria-label={`Select ${r.name}`}
+                className="accent-teal"
+              />
+              <div className="min-w-0">
+                <button
+                  type="button"
+                  onClick={() => onRowAction(r.id, "open")}
+                  className="font-medium text-ink hover:underline truncate text-left block w-full"
+                >
                   {r.name}
                 </button>
-              </td>
-              <td className="px-3 py-2 text-muted">{r.project_name}</td>
-              <td className="px-3 py-2 text-muted">{r.industry_segment}</td>
-              <td className="px-3 py-2 text-right numeric tabular-nums text-ink">
+                <div className="text-[11px] text-muted truncate mono">{r.project_name}</div>
+              </div>
+              <div className="text-[12px] text-muted mono truncate">{r.industry_segment}</div>
+              <div className="mono tnum text-ink text-sm font-medium text-right">
                 {formatHours(r.hours)}
-              </td>
-              <td className="px-3 py-2 text-muted numeric tabular-nums">
+              </div>
+              <div className="mono tnum text-muted text-[12px]">
                 {formatHours(r.range_low)}–{formatHours(r.range_high)}
-              </td>
-              <td className="px-3 py-2 text-muted">{new Date(r.created_at).toLocaleDateString()}</td>
-              <td className="px-3 py-2 text-right">
-                <div className="inline-flex gap-2 text-xs">
-                  <button
-                    className="text-teal hover:underline"
-                    onClick={() => onRowAction(r.id, "duplicate")}
-                  >
-                    Duplicate
-                  </button>
-                  <button
-                    className="text-teal hover:underline"
-                    onClick={() => onRowAction(r.id, "pdf")}
-                  >
-                    PDF
-                  </button>
-                  <button
-                    className="text-danger hover:underline"
-                    onClick={() => onRowAction(r.id, "delete")}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
-          {rows.length === 0 && (
-            <tr>
-              <td colSpan={8} className="px-3 py-6 text-center text-muted">
-                No saved quotes yet.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+              </div>
+              <div
+                className="flex items-center gap-1"
+                aria-label={`Confidence ${dots} of 5`}
+                title={`Confidence ${dots} of 5`}
+              >
+                {[1, 2, 3, 4, 5].map((k) => (
+                  <span
+                    key={k}
+                    className={
+                      "w-1.5 h-1.5 rounded-full " +
+                      (k <= dots ? "bg-amber" : "bg-line2")
+                    }
+                  />
+                ))}
+              </div>
+              <div className="mono tnum text-muted text-[11px]">
+                {new Date(r.created_at).toLocaleDateString()}
+              </div>
+              <div className="relative opacity-0 group-hover:opacity-100 transition-opacity">
+                <details className="relative">
+                  <summary className="list-none cursor-pointer inline-flex items-center justify-center w-6 h-6 rounded-sm hover:bg-line">
+                    <MoreVertical size={14} strokeWidth={1.75} className="text-muted" />
+                  </summary>
+                  <div className="absolute right-0 top-7 z-10 w-40 card shadow-md text-sm">
+                    <button
+                      type="button"
+                      onClick={() => onRowAction(r.id, "duplicate")}
+                      className="w-full flex items-center gap-2 px-3 py-2 hover:bg-paper"
+                    >
+                      <Copy size={14} strokeWidth={1.75} /> Duplicate
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onRowAction(r.id, "pdf")}
+                      className="w-full flex items-center gap-2 px-3 py-2 hover:bg-paper"
+                    >
+                      <Download size={14} strokeWidth={1.75} /> Export PDF
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onRowAction(r.id, "delete")}
+                      className="w-full flex items-center gap-2 px-3 py-2 hover:bg-paper text-danger"
+                    >
+                      <Trash2 size={14} strokeWidth={1.75} /> Delete
+                    </button>
+                  </div>
+                </details>
+              </div>
+            </div>
+          );
+        })
+      )}
     </div>
   );
 }
