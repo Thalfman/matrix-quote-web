@@ -31,3 +31,19 @@ def test_accuracy_heatmap_handles_missing_history():
     assert ops == []
     assert quarters == []
     assert matrix == []
+
+
+def test_overview_endpoint_degrades_when_nothing_exists(tmp_path, monkeypatch):
+    monkeypatch.setenv("DATA_DIR", str(tmp_path))
+    from importlib import reload
+    from backend.app import main, paths
+    reload(paths); reload(main)
+    from fastapi.testclient import TestClient
+    client = TestClient(main.app)
+    r = client.get("/api/insights/overview")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["active_quotes_30d"] == 0
+    assert body["quotes_activity"] and len(body["quotes_activity"]) == 26
+    assert body["latest_quotes"] == []
+    assert body["accuracy_heatmap"] == []
