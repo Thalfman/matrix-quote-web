@@ -6,9 +6,9 @@ export type Chip = { label: string; tone?: ChipTone };
 
 const toneClasses: Record<ChipTone, string> = {
   success: "bg-success/10 text-success",
-  warning: "bg-warning/10 text-warning",
-  accent: "bg-accent/10 text-accent",
-  muted: "bg-border dark:bg-border-dark text-muted dark:text-muted-dark",
+  warning: "bg-amberSoft text-ink",
+  accent:  "bg-tealSoft text-tealDark",
+  muted:   "bg-line text-muted",
 };
 
 export function PageHeader({
@@ -23,11 +23,13 @@ export function PageHeader({
   chips?: Chip[];
 }) {
   return (
-    <header className="mb-8 flex flex-wrap items-start justify-between gap-4">
+    <header className="flex items-end justify-between gap-6 pb-6 mb-8 border-b hairline flex-wrap">
       <div>
-        {eyebrow && <div className="text-xs tracking-widest muted mb-2">{eyebrow}</div>}
-        <h1 className="text-3xl font-medium">{title}</h1>
-        {description && <p className="muted mt-2 max-w-2xl">{description}</p>}
+        {eyebrow && <div className="eyebrow text-[11px] text-teal">{eyebrow}</div>}
+        <h1 className="display-hero text-4xl leading-none mt-2 text-ink">{title}</h1>
+        {description && (
+          <p className="text-sm text-muted mt-3 max-w-xl">{description}</p>
+        )}
       </div>
       {chips && chips.length > 0 && (
         <div className="flex flex-wrap gap-2">
@@ -35,7 +37,7 @@ export function PageHeader({
             <span
               key={c.label}
               className={cn(
-                "inline-flex items-center px-2 py-1 rounded-md text-xs",
+                "inline-flex items-center px-2.5 py-1 rounded-sm text-xs",
                 toneClasses[c.tone ?? "muted"],
               )}
             >
