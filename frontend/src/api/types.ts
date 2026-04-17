@@ -167,3 +167,26 @@ export type SavedQuoteList = {
   total: number;
   rows: SavedQuoteSummary[];
 };
+
+export type MapeRow       = { operation: string; mape: number; rows: number | null };
+export type CalibrationPoint = { predicted_low: number; predicted_high: number; actual: number; inside_band: boolean };
+export type TrainingRunRow = { run_id: string; trained_at: string; rows: number; overall_mape: number };
+export type PerformanceHeadline = {
+  overall_mape: number | null;
+  within_10_pct: number | null;
+  within_20_pct: number | null;
+  last_trained_at: string | null;
+  rows_at_train: number | null;
+};
+export type InsightsOverview = {
+  active_quotes_30d: number;
+  models_trained: number;
+  models_target: number;
+  overall_mape: number | null;
+  calibration_within_band_pct: number | null;
+  quotes_activity: [string, number][];
+  latest_quotes: SavedQuoteSummary[];
+  accuracy_heatmap: (number | null)[][];
+  operations: string[];
+  quarters: string[];
+};
