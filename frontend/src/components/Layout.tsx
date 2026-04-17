@@ -22,7 +22,10 @@ const PUBLIC_NAV: NavGroup[] = [
   },
   {
     label: "INSIGHTS",
-    items: [{ to: "/performance", label: "Model Performance" }],
+    items: [
+      { to: "/performance", label: "Estimate Accuracy" },
+      { to: "/insights", label: "Executive Overview" },
+    ],
   },
 ];
 
