@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Any
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from weasyprint import HTML
 
 from .schemas_api import SavedQuote
 
@@ -76,6 +75,11 @@ def _input_rows(inputs: Any) -> list[tuple[str, str]]:
 
 
 def render_quote_pdf(quote: SavedQuote, *, quote_number: str) -> bytes:
+    # Lazy import: weasyprint requires native pango/gobject libs that are absent
+    # on Windows dev boxes. Importing at call time means the module loads fine
+    # without those libs; the OSError only surfaces when actually rendering.
+    from weasyprint import HTML  # noqa: PLC0415
+
     env = _render_env()
     template = env.get_template("quote_pdf.html")
     html = template.render(
