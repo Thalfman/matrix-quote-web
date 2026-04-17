@@ -3,9 +3,9 @@ import { cn } from "@/lib/utils";
 type Confidence = "high" | "medium" | "low";
 
 const styles: Record<Confidence, { dot: string; label: string }> = {
-  high: { dot: "bg-success", label: "text-success" },
-  medium: { dot: "bg-warning", label: "text-warning" },
-  low: { dot: "bg-danger", label: "text-danger" },
+  high:   { dot: "bg-success", label: "text-success" },
+  medium: { dot: "bg-amber",   label: "text-ink" },
+  low:    { dot: "bg-danger",  label: "text-danger" },
 };
 
 export function ConfidenceDot({
