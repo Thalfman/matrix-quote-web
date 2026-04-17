@@ -59,3 +59,11 @@ def calibration_path() -> Path:
     `.exists()` before reading.
     """
     return models_dir() / "calibration.parquet"
+
+
+def status_json_path() -> Path:
+    return data_dir() / "status.json"
+
+
+def demo_assets_dir() -> Path:
+    return Path(__file__).resolve().parent.parent.parent / "demo_assets"
