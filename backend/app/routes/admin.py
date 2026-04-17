@@ -19,8 +19,10 @@ from ..deps import (
     require_admin,
     verify_admin_password,
 )
+from .. import demo
 from ..schemas_api import (
     DatasetPage,
+    DemoLoadResponse,
     DriversResponse,
     LoginRequest,
     LoginResponse,
@@ -85,3 +87,9 @@ def reset_prepare(_: str = Depends(require_admin)) -> ResetPrepareResponse:
 @router.post("/reset")
 def reset(body: ResetRequest, _: str = Depends(require_admin)) -> dict:
     raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Pending vertical slice")
+
+
+@router.post("/demo/load", response_model=DemoLoadResponse)
+def load_demo(_: str = Depends(require_admin)) -> DemoLoadResponse:
+    loaded, reason = demo.seed_on_demand()
+    return DemoLoadResponse(loaded=loaded, reason=reason)

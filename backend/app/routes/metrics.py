@@ -14,10 +14,11 @@ from __future__ import annotations
 import pandas as pd
 from fastapi import APIRouter
 
-from .. import storage
+from .. import demo, storage
 from ..paths import calibration_path, metrics_history_path
 from ..schemas_api import (
     CalibrationPoint,
+    DemoStatus,
     DropdownOptions,
     HealthResponse,
     MapeRow,
@@ -134,3 +135,13 @@ def metrics_headline() -> PerformanceHeadline:
             last = pd.to_datetime(hdf["trained_at"]).max()
             head.last_trained_at = last.to_pydatetime()
     return head
+
+
+@router.get("/demo/status", response_model=DemoStatus)
+def demo_status() -> DemoStatus:
+    status = demo.read_status()
+    return DemoStatus(
+        is_demo=bool(status.get("is_demo", False)),
+        enabled_env=demo._demo_enabled_env(),  # safe: read-only env probe
+        has_real_data=demo.has_real_data(),
+    )

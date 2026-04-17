@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from . import demo
 from .deps import get_settings
 from .paths import ensure_runtime_dirs
 from .routes import admin, insights, metrics, quote, quotes
@@ -22,6 +23,7 @@ from .routes import admin, insights, metrics, quote, quotes
 def create_app() -> FastAPI:
     settings = get_settings()
     ensure_runtime_dirs()
+    demo.seed_if_enabled()
 
     app = FastAPI(
         title="Matrix Quote Web",
