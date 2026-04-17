@@ -1,0 +1,78 @@
+"""Settings, auth dependencies, and shared helpers."""
+
+from __future__ import annotations
+
+import hmac
+from datetime import datetime, timedelta, timezone
+from functools import lru_cache
+from typing import Annotated
+
+from fastapi import Depends, Header, HTTPException, status
+from jose import JWTError, jwt
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    admin_password: str = ""
+    admin_jwt_secret: str = ""
+    admin_token_expiry_hours: int = 12
+    data_dir: str = "."
+    cors_allow_origins: str = "http://localhost:5173"
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        return [o.strip() for o in self.cors_allow_origins.split(",") if o.strip()]
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
+
+
+JWT_ALGORITHM = "HS256"
+
+
+def create_admin_token(settings: Settings) -> tuple[str, datetime]:
+    expires_at = datetime.now(timezone.utc) + timedelta(
+        hours=settings.admin_token_expiry_hours
+    )
+    claims = {"sub": "admin", "exp": expires_at}
+    token = jwt.encode(claims, settings.admin_jwt_secret, algorithm=JWT_ALGORITHM)
+    return token, expires_at
+
+
+def verify_admin_password(settings: Settings, supplied: str) -> bool:
+    if not settings.admin_password:
+        return False
+    return hmac.compare_digest(settings.admin_password, supplied)
+
+
+def require_admin(
+    authorization: Annotated[str | None, Header()] = None,
+    settings: Annotated[Settings, Depends(get_settings)] = None,
+) -> str:
+    if not authorization or not authorization.lower().startswith("bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing bearer token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    token = authorization.split(" ", 1)[1]
+    try:
+        claims = jwt.decode(token, settings.admin_jwt_secret, algorithms=[JWT_ALGORITHM])
+    except JWTError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from exc
+    if claims.get("sub") != "admin":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token subject")
+    return "admin"

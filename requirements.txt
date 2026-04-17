@@ -1,9 +1,19 @@
+# Production dependencies. Installed by Railway from the repo root.
+# Core ML library (vendored from matrix_quote_app) depends on:
 pandas
 numpy
 scikit-learn
-pydantic
+pydantic>=2.5
 joblib
-streamlit
-altair
 openpyxl
 pyarrow
+
+# Backend API:
+fastapi>=0.110
+uvicorn[standard]>=0.27
+gunicorn>=21.2
+python-multipart>=0.0.9
+python-jose[cryptography]>=3.3
+pydantic-settings>=2.1
+filelock>=3.13
+slowapi>=0.1.9
