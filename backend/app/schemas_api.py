@@ -47,6 +47,10 @@ __all__ = [
     "OperationDrivers",
     "NeighborProject",
     "ExplainedQuoteResponse",
+    "SavedQuoteCreate",
+    "SavedQuote",
+    "SavedQuoteSummary",
+    "SavedQuoteList",
 ]
 
 
@@ -211,3 +215,37 @@ class ExplainedQuoteResponse(BaseModel):
     prediction: QuotePrediction
     drivers: list[OperationDrivers] | None = None
     neighbors: list[NeighborProject] | None = None
+
+
+class SavedQuoteCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+    project_name: str = Field(min_length=1, max_length=200)
+    client_name: str | None = Field(default=None, max_length=200)
+    notes: str | None = Field(default=None, max_length=1000)
+    created_by: str = Field(min_length=1, max_length=120)
+    inputs: QuoteInput
+    prediction: QuotePrediction
+    quoted_hours_by_bucket: dict[str, float] | None = None
+
+
+class SavedQuote(SavedQuoteCreate):
+    id: str                  # uuid4 hex
+    created_at: datetime
+
+
+class SavedQuoteSummary(BaseModel):
+    id: str
+    name: str
+    project_name: str
+    client_name: str | None = None
+    industry_segment: str
+    hours: float              # prediction.total_p50
+    range_low: float
+    range_high: float
+    created_at: datetime
+    created_by: str
+
+
+class SavedQuoteList(BaseModel):
+    total: int
+    rows: list[SavedQuoteSummary]
