@@ -43,6 +43,10 @@ __all__ = [
     "OverviewResponse",
     "ResetPrepareResponse",
     "ResetRequest",
+    "DriverContribution",
+    "OperationDrivers",
+    "NeighborProject",
+    "ExplainedQuoteResponse",
 ]
 
 
@@ -167,3 +171,43 @@ class ResetPrepareResponse(BaseModel):
 
 class ResetRequest(BaseModel):
     confirm_token: str
+
+
+class DriverContribution(BaseModel):
+    """One feature's signed contribution to a single operation's hours."""
+
+    feature: str           # humanized label ("Stations", "Industry: Automotive")
+    contribution: float    # signed hours (+62.0, -22.0)
+    value: str             # displayed input value ("12", "Automotive", "180 ft")
+
+
+class OperationDrivers(BaseModel):
+    """Top-N drivers for one operation model."""
+
+    operation: str         # e.g. "mechanical_hours"
+    drivers: list[DriverContribution] = Field(default_factory=list)
+    available: bool = True
+    reason: str | None = None   # populated only when available=False
+
+
+class NeighborProject(BaseModel):
+    """A historical project similar to the current quote input."""
+
+    project_name: str
+    year: int | None = None
+    industry_segment: str
+    automation_level: str
+    stations: int | None = None
+    actual_hours: float
+    similarity: float      # 0..1 (1 = identical after preprocessing)
+
+
+class ExplainedQuoteResponse(BaseModel):
+    """Wrapper returned by POST /api/quote/single.
+
+    Nests the vendored QuotePrediction so we don't edit core/schemas.py.
+    """
+
+    prediction: QuotePrediction
+    drivers: list[OperationDrivers] | None = None
+    neighbors: list[NeighborProject] | None = None
