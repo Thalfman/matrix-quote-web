@@ -17,9 +17,9 @@ export function Field({
 }) {
   return (
     <label className={cn("block", className)}>
-      <span className="text-xs muted block mb-1">{label}</span>
+      <span className="eyebrow text-[10px] text-muted block mb-1.5">{label}</span>
       {children}
-      {hint && !error && <span className="text-[11px] muted block mt-1">{hint}</span>}
+      {hint && !error && <span className="text-[11px] text-muted block mt-1">{hint}</span>}
       {error && <span className="text-[11px] text-danger block mt-1">{error}</span>}
     </label>
   );
