@@ -22,10 +22,17 @@ matrix-quote-web/
 │       ├── templates/          # Jinja2 PDF template + print CSS + SVG wordmark
 │       └── routes/
 │           ├── quote.py        # /api/quote/single + /api/quote/pdf (ad-hoc PDF)
-│           └── quotes.py       # /api/quotes CRUD + duplicate + per-scenario PDF
+│           ├── quotes.py       # /api/quotes CRUD + duplicate + per-scenario PDF
+│           ├── metrics.py      # /api/metrics/* — headline + history + calibration + GET /api/demo/status
+│           ├── insights.py     # /api/insights/overview — executive KPI snapshot
+│           └── admin.py        # admin-guarded routes incl. POST /api/admin/demo/load
 ├── frontend/        # Vite SPA (Inter font, Matrix navy/electric-blue palette)
+├── demo_assets/     # committed synthetic dataset + pretrained models for demo mode
+│   ├── data/master/projects_master.parquet  # 300-row synthetic master
+│   └── models/     # 12 *.joblib bundles, metrics_summary.csv, metrics_history.parquet, calibration.parquet
 ├── scripts/         # one-off utilities
-│   └── build_test_fixtures.py   # generate synthetic fixture models (run once)
+│   ├── build_test_fixtures.py   # generate synthetic fixture models (run once)
+│   └── generate_demo_assets.py  # rebuild demo_assets/ after schema or pipeline changes
 ├── tests/           # pytest
 │   └── fixtures/tiny_models/   # checked-in synthetic models for unit tests
 ├── data/master/     # runtime: master parquet + saved quotes parquet (gitignored)
@@ -67,6 +74,18 @@ degrade gracefully to `null` if models don't support SHAP.
 | `GET` | `/api/quotes/{id}/pdf` | Download a saved scenario as a PDF file |
 | `POST` | `/api/quote/pdf` | Download an unsaved cockpit result as a PDF (`AdHocPdfRequest` body) |
 
+### Metrics and Insights API
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/metrics` | Per-operation model metrics summary (`MetricsSummary`) |
+| `GET` | `/api/metrics/history` | Per-run training history (`TrainingRunRow[]`); returns `[]` until training pipeline persists `metrics_history.parquet` |
+| `GET` | `/api/metrics/calibration` | Prediction-vs-actual scatter points (`CalibrationPoint[]`); returns `[]` until `calibration.parquet` exists |
+| `GET` | `/api/metrics/headline` | Single-row performance summary (`PerformanceHeadline`); fields are `null` when optional parquet files are absent |
+| `GET` | `/api/insights/overview` | Executive KPI snapshot (`InsightsOverview`): active quotes, model readiness, MAPE, calibration band %, 26-week activity chart, latest 5 quotes, MAPE heatmap |
+| `GET` | `/api/demo/status` | Demo mode state (`DemoStatus`): `is_demo`, `enabled_env`, `has_real_data`; public endpoint polled by the `DemoChip` component |
+| `POST` | `/api/admin/demo/load` | Admin-guarded: copies `demo_assets/` into `DATA_DIR` and writes `status.json`; returns `DemoLoadResponse`; refuses if real data is already present |
+
 No auth gate on quotes endpoints. `created_by` is a browser-captured display name (stored in `localStorage`) sent with each save.
 
 Scenarios are persisted in `data/master/quotes.parquet`. The `inputs` and `prediction` fields are stored as JSON strings so schema evolution of `QuoteInput` does not churn the parquet schema. Writes use an atomic `os.replace` pattern (write to `quotes.parquet.tmp`, then rename).
@@ -80,6 +99,18 @@ npm run dev
 ```
 
 The Vite dev server proxies `/api/*` to `http://localhost:8000`.
+
+### Demo mode
+
+Set `ENABLE_DEMO=1` with an empty `DATA_DIR` to seed a synthetic dataset + pretrained models at startup:
+
+    ENABLE_DEMO=1 DATA_DIR=./.tmp_demo uvicorn backend.app.main:app
+
+Admins can also load demo data at runtime via the "Load demo data" button on Upload & Train. The demo load refuses when real data is already present. A "Demo mode" chip renders in the top-right of every page while demo data is loaded.
+
+Rebuild demo assets with:
+
+    python scripts/generate_demo_assets.py
 
 ## Running tests
 
@@ -140,6 +171,7 @@ Side-by-side view for 2–3 saved scenarios:
 | `/quotes` | `Quotes` | Saved scenarios list |
 | `/quotes/compare` | `Compare` | Side-by-side scenario comparison |
 | `/performance` | `ModelPerformance` | Estimate accuracy dashboard |
-| `/admin/*` | Admin pages | Upload, train, data explorer (auth-gated) |
+| `/insights` | `ExecutiveOverview` | Executive KPI overview (activity chart, MAPE heatmap) |
+| `/admin/*` | Admin pages | Upload, train, data explorer (auth-gated); Upload & Train includes "Load demo data" button |
 
 Compare-PDF (multi-scenario) is deferred per spec; only single-quote PDFs are supported.

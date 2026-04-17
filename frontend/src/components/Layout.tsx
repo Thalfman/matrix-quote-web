@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/client";
 import { HealthResponse } from "@/api/types";
 import { cn } from "@/lib/utils";
+import { DemoChip } from "@/components/DemoChip";
+import { UserPill } from "@/components/UserPill";
 
 type NavEntry = { to: string; label: string; end?: boolean };
 type NavGroup = { label: string; items: NavEntry[] };
@@ -22,7 +24,10 @@ const PUBLIC_NAV: NavGroup[] = [
   },
   {
     label: "INSIGHTS",
-    items: [{ to: "/performance", label: "Model Performance" }],
+    items: [
+      { to: "/performance", label: "Estimate Accuracy" },
+      { to: "/insights", label: "Executive Overview" },
+    ],
   },
 ];
 
@@ -100,6 +105,21 @@ export function Layout() {
       </aside>
 
       <main className="flex-1 overflow-x-hidden">
+        {/* Mobile top bar — visible only below lg breakpoint */}
+        <div className="lg:hidden flex items-center justify-between px-4 pt-4">
+          <div className="text-sm font-medium">Matrix Quote</div>
+          <div className="flex items-center gap-2">
+            <DemoChip />
+            <UserPill />
+          </div>
+        </div>
+
+        {/* Desktop chip + pill row — hidden on mobile */}
+        <div className="hidden lg:flex items-center justify-end gap-3 px-6 lg:px-10 pt-4">
+          <DemoChip />
+          <UserPill />
+        </div>
+
         <div className="max-w-content mx-auto px-6 lg:px-10 py-8">
           <Outlet />
         </div>

@@ -41,3 +41,29 @@ def ensure_runtime_dirs() -> None:
 
 def quotes_parquet_path() -> Path:
     return data_dir() / "data" / "master" / "quotes.parquet"
+
+
+def metrics_history_path() -> Path:
+    """Path to the per-run training-history parquet.
+
+    Written by the training pipeline (not yet implemented); callers must check
+    `.exists()` before reading.
+    """
+    return models_dir() / "metrics_history.parquet"
+
+
+def calibration_path() -> Path:
+    """Path to the prediction-vs-actual calibration parquet.
+
+    Written by the training pipeline (not yet implemented); callers must check
+    `.exists()` before reading.
+    """
+    return models_dir() / "calibration.parquet"
+
+
+def status_json_path() -> Path:
+    return data_dir() / "status.json"
+
+
+def demo_assets_dir() -> Path:
+    return Path(__file__).resolve().parent.parent.parent / "demo_assets"

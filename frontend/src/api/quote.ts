@@ -2,13 +2,17 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "./client";
 import {
+  CalibrationPoint,
   DropdownOptions,
   ExplainedQuoteResponse,
+  InsightsOverview,
+  PerformanceHeadline,
   QuoteInput,
   QuotePrediction,
   SavedQuote,
   SavedQuoteCreate,
   SavedQuoteList,
+  TrainingRunRow,
 } from "./types";
 
 export function useDropdowns() {
@@ -98,4 +102,29 @@ export async function downloadAdHocPdf(body: {
 }): Promise<void> {
   const resp = await api.post("/quote/pdf", body, { responseType: "blob" });
   _streamDownload(resp as { data: Blob }, `Matrix-Quote-${body.project_name.replace(/\s+/g, "-")}.pdf`);
+}
+
+export function useMetricsHistory() {
+  return useQuery<TrainingRunRow[]>({
+    queryKey: ["metricsHistory"],
+    queryFn: async () => (await api.get<TrainingRunRow[]>("/metrics/history")).data,
+  });
+}
+export function useCalibration() {
+  return useQuery<CalibrationPoint[]>({
+    queryKey: ["calibration"],
+    queryFn: async () => (await api.get<CalibrationPoint[]>("/metrics/calibration")).data,
+  });
+}
+export function usePerformanceHeadline() {
+  return useQuery<PerformanceHeadline>({
+    queryKey: ["performanceHeadline"],
+    queryFn: async () => (await api.get<PerformanceHeadline>("/metrics/headline")).data,
+  });
+}
+export function useInsightsOverview() {
+  return useQuery<InsightsOverview>({
+    queryKey: ["insightsOverview"],
+    queryFn: async () => (await api.get<InsightsOverview>("/insights/overview")).data,
+  });
 }

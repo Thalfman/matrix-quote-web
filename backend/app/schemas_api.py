@@ -52,6 +52,13 @@ __all__ = [
     "SavedQuoteSummary",
     "SavedQuoteList",
     "AdHocPdfRequest",
+    "MapeRow",
+    "CalibrationPoint",
+    "TrainingRunRow",
+    "PerformanceHeadline",
+    "InsightsOverview",
+    "DemoStatus",
+    "DemoLoadResponse",
 ]
 
 
@@ -259,3 +266,55 @@ class AdHocPdfRequest(BaseModel):
     created_by: str = "Anonymous"
     inputs: QuoteInput
     prediction: QuotePrediction
+
+
+class MapeRow(BaseModel):
+    operation: str
+    mape: float
+    rows: int | None = None
+
+
+class CalibrationPoint(BaseModel):
+    predicted_low: float
+    predicted_high: float
+    actual: float
+    inside_band: bool
+
+
+class TrainingRunRow(BaseModel):
+    run_id: str
+    trained_at: datetime
+    rows: int
+    overall_mape: float
+
+
+class PerformanceHeadline(BaseModel):
+    overall_mape: float | None = None
+    within_10_pct: float | None = None
+    within_20_pct: float | None = None
+    last_trained_at: datetime | None = None
+    rows_at_train: int | None = None
+
+
+class InsightsOverview(BaseModel):
+    active_quotes_30d: int
+    models_trained: int
+    models_target: int
+    overall_mape: float | None
+    calibration_within_band_pct: float | None
+    quotes_activity: list[tuple[str, int]]   # (iso week start, count)
+    latest_quotes: list[SavedQuoteSummary]
+    accuracy_heatmap: list[list[float | None]]   # rows = operations, cols = quarters
+    operations: list[str]
+    quarters: list[str]
+
+
+class DemoStatus(BaseModel):
+    is_demo: bool = False
+    enabled_env: bool = False
+    has_real_data: bool = False
+
+
+class DemoLoadResponse(BaseModel):
+    loaded: bool
+    reason: str | None = None
