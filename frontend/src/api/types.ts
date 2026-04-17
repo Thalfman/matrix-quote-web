@@ -104,3 +104,32 @@ export type LoginResponse = {
   token: string;
   expires_at: string;
 };
+
+export type DriverContribution = {
+  feature: string;
+  contribution: number;
+  value: string;
+};
+
+export type OperationDrivers = {
+  operation: string;
+  drivers: DriverContribution[];
+  available: boolean;
+  reason?: string | null;
+};
+
+export type NeighborProject = {
+  project_name: string;
+  year?: number | null;
+  industry_segment: string;
+  automation_level: string;
+  stations?: number | null;
+  actual_hours: number;
+  similarity: number;
+};
+
+export type ExplainedQuoteResponse = {
+  prediction: QuotePrediction;
+  drivers?: OperationDrivers[] | null;
+  neighbors?: NeighborProject[] | null;
+};

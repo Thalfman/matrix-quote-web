@@ -1,0 +1,13 @@
+target,version,rows,mae,r2,model_path
+me10_actual_hours,v1,64,26.199230848058782,0.43365128970546285,tests\fixtures\tiny_models\models\me10_actual_hours_v1.joblib
+me15_actual_hours,v1,64,28.70007373109348,0.25419225410384283,tests\fixtures\tiny_models\models\me15_actual_hours_v1.joblib
+me230_actual_hours,v1,64,25.23982851514165,0.06571920442877399,tests\fixtures\tiny_models\models\me230_actual_hours_v1.joblib
+ee20_actual_hours,v1,64,23.18699357946535,0.3639756373930665,tests\fixtures\tiny_models\models\ee20_actual_hours_v1.joblib
+rb30_actual_hours,v1,64,20.836690215236324,0.23718914972709038,tests\fixtures\tiny_models\models\rb30_actual_hours_v1.joblib
+cp50_actual_hours,v1,64,20.86116228841108,0.2150168673667323,tests\fixtures\tiny_models\models\cp50_actual_hours_v1.joblib
+bld100_actual_hours,v1,64,7.942883429153563,0.7560763509679157,tests\fixtures\tiny_models\models\bld100_actual_hours_v1.joblib
+shp150_actual_hours,v1,64,4.58637023832136,-1.1077241041366999,tests\fixtures\tiny_models\models\shp150_actual_hours_v1.joblib
+inst160_actual_hours,v1,64,12.96270518539183,0.011461117482205907,tests\fixtures\tiny_models\models\inst160_actual_hours_v1.joblib
+trv180_actual_hours,v1,64,13.929659598271158,-0.24772555340832048,tests\fixtures\tiny_models\models\trv180_actual_hours_v1.joblib
+doc190_actual_hours,v1,64,6.198216607102395,0.2939453566302789,tests\fixtures\tiny_models\models\doc190_actual_hours_v1.joblib
+pm200_actual_hours,v1,64,10.397192326198313,0.5351668375278368,tests\fixtures\tiny_models\models\pm200_actual_hours_v1.joblib

@@ -5,22 +5,21 @@ from __future__ import annotations
 import io
 
 import pandas as pd
+from core.config import QUOTE_CAT_FEATURES, QUOTE_NUM_FEATURES
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import StreamingResponse
-
-from core.config import QUOTE_CAT_FEATURES, QUOTE_NUM_FEATURES
 from service.predict_lib import predict_quote, predict_quotes_df
 
 from .. import storage
-from ..schemas_api import QuoteInput, QuotePrediction
+from ..schemas_api import ExplainedQuoteResponse, QuoteInput
 
 router = APIRouter(prefix="/api/quote", tags=["quote"])
 
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 
 
-@router.post("/single", response_model=QuotePrediction)
-def single_quote(payload: QuoteInput) -> QuotePrediction:
+@router.post("/single", response_model=ExplainedQuoteResponse)
+def single_quote(payload: QuoteInput) -> ExplainedQuoteResponse:
     if not storage.models_ready():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -32,7 +31,23 @@ def single_quote(payload: QuoteInput) -> QuotePrediction:
             status_code=status.HTTP_409_CONFLICT,
             detail="No operation models produced a prediction.",
         )
-    return pred
+
+    # Best-effort explainability. Never fail the quote because of it.
+    from ..explain import compute_drivers, compute_neighbors
+    try:
+        drivers = compute_drivers(payload, top_n=3)
+    except Exception:
+        drivers = None
+    try:
+        neighbors = compute_neighbors(payload, k=5)
+    except Exception:
+        neighbors = None
+
+    return ExplainedQuoteResponse(
+        prediction=pred,
+        drivers=drivers,
+        neighbors=neighbors,
+    )
 
 
 def _read_upload(file: UploadFile, sheet: str | None) -> pd.DataFrame:

@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { api } from "./client";
-import { DropdownOptions, QuoteInput, QuotePrediction } from "./types";
+import { DropdownOptions, ExplainedQuoteResponse, QuoteInput } from "./types";
 
 export function useDropdowns() {
   return useQuery({
@@ -12,10 +12,8 @@ export function useDropdowns() {
 }
 
 export function useSingleQuote() {
-  return useMutation({
-    mutationFn: async (payload: QuoteInput) => {
-      const { data } = await api.post<QuotePrediction>("/quote/single", payload);
-      return data;
-    },
+  return useMutation<ExplainedQuoteResponse, unknown, QuoteInput>({
+    mutationFn: async (input) =>
+      (await api.post<ExplainedQuoteResponse>("/quote/single", input)).data,
   });
 }

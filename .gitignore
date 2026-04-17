@@ -21,9 +21,14 @@ core/ui.py
 frontend/dist/
 frontend/node_modules/
 frontend/.vite/
+frontend/*.tsbuildinfo
+frontend/tailwind.config.js
+frontend/tailwind.config.d.ts
+frontend/vite.config.js
+frontend/vite.config.d.ts
 
 # Python
-__pycache__/
+**/__pycache__/
 *.pyc
 *.pyo
 *.pyd
