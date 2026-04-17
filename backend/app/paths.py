@@ -41,3 +41,11 @@ def ensure_runtime_dirs() -> None:
 
 def quotes_parquet_path() -> Path:
     return data_dir() / "data" / "master" / "quotes.parquet"
+
+
+def metrics_history_path() -> Path:
+    return models_dir() / "metrics_history.parquet"
+
+
+def calibration_path() -> Path:
+    return models_dir() / "calibration.parquet"
