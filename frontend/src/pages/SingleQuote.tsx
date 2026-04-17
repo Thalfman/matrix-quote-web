@@ -68,9 +68,9 @@ export function SingleQuote() {
     return (
       <>
         <PageHeader
-          eyebrow="Estimate"
+          eyebrow="Estimate · Cockpit"
           title="Single Quote"
-          description="Enter quote-time project parameters to generate an hour estimate with confidence intervals per sales bucket."
+          description="Enter project parameters to generate an hour estimate with confidence intervals, driver attribution, and similar historical projects."
           chips={[{ label: "Models not trained", tone: "warning" }]}
         />
         <EmptyState
@@ -160,9 +160,9 @@ export function SingleQuote() {
   return (
     <>
       <PageHeader
-        eyebrow="Estimate"
+        eyebrow="Estimate · Cockpit"
         title="Single Quote"
-        description="Enter quote-time project parameters to generate an hour estimate with confidence intervals per sales bucket."
+        description="Enter project parameters to generate an hour estimate with confidence intervals, driver attribution, and similar historical projects."
         chips={[{ label: "Models ready", tone: "success" }]}
       />
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
