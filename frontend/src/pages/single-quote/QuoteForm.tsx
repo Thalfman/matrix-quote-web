@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 
 import { DropdownOptions } from "@/api/types";
@@ -16,9 +16,10 @@ type Props = {
   submitting: boolean;
   onSubmit: (quoted: Partial<Record<(typeof SALES_BUCKETS)[number], number>>) => void;
   form: UseFormReturn<QuoteFormValues>;
+  formRef?: React.RefObject<HTMLFormElement>;
 };
 
-export function QuoteForm({ dropdowns, submitting, onSubmit, form }: Props) {
+export function QuoteForm({ dropdowns, submitting, onSubmit, form, formRef }: Props) {
   const [compareOpen, setCompareOpen] = useState(false);
   const [quotedHours, setQuotedHours] = useState<Record<string, number>>({});
 
@@ -35,7 +36,7 @@ export function QuoteForm({ dropdowns, submitting, onSubmit, form }: Props) {
     dropdowns?.[key]?.length ? dropdowns[key] : fallback;
 
   return (
-    <form onSubmit={fire}>
+    <form ref={formRef} onSubmit={fire}>
       <Section step="01" title="Project classification" description="Segment, system type, and project flags">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <Field label="Industry segment" error={formState.errors.industry_segment?.message}>
