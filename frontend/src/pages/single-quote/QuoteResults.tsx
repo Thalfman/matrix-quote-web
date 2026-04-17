@@ -9,7 +9,7 @@ import {
   YAxis,
 } from "recharts";
 
-import { QuotePrediction } from "@/api/types";
+import { ExplainedQuoteResponse, QuotePrediction } from "@/api/types";
 import { ConfidenceDot } from "@/components/ConfidenceDot";
 import { ResultHero } from "@/components/ResultHero";
 import { Tabs } from "@/components/Tabs";
@@ -18,11 +18,17 @@ import { formatHours } from "@/lib/utils";
 import { OPERATION_ORDER, SALES_BUCKETS, SalesBucket } from "./schema";
 
 type Props = {
+  result: ExplainedQuoteResponse;
+  quotedHoursByBucket: Partial<Record<SalesBucket, number>>;
+};
+
+type InnerProps = {
   prediction: QuotePrediction;
   quotedHoursByBucket: Partial<Record<SalesBucket, number>>;
 };
 
-export function QuoteResults({ prediction, quotedHoursByBucket }: Props) {
+export function QuoteResults({ result, quotedHoursByBucket }: Props) {
+  const prediction = result.prediction;
   const hasQuoted = Object.keys(quotedHoursByBucket).length > 0;
   const totalQuoted = Object.values(quotedHoursByBucket).reduce((s, v) => s + (v ?? 0), 0);
   const totalDelta = totalQuoted - prediction.total_p50;
@@ -69,7 +75,7 @@ export function QuoteResults({ prediction, quotedHoursByBucket }: Props) {
   );
 }
 
-function SalesView({ prediction, quotedHoursByBucket }: Props) {
+function SalesView({ prediction, quotedHoursByBucket }: InnerProps) {
   const hasQuoted = Object.keys(quotedHoursByBucket).length > 0;
 
   const rows = SALES_BUCKETS.map((bucket) => {

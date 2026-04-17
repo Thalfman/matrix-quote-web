@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { api } from "@/api/client";
 import { useDropdowns, useSingleQuote } from "@/api/quote";
-import { HealthResponse, QuotePrediction } from "@/api/types";
+import { ExplainedQuoteResponse, HealthResponse } from "@/api/types";
 import { EmptyState } from "@/components/EmptyState";
 import { PageHeader } from "@/components/PageHeader";
 
@@ -34,7 +34,7 @@ export function SingleQuote() {
     mode: "onBlur",
   });
 
-  const [prediction, setPrediction] = useState<QuotePrediction | null>(null);
+  const [result, setResult] = useState<ExplainedQuoteResponse | null>(null);
   const [quotedHoursByBucket, setQuotedHoursByBucket] = useState<Partial<Record<SalesBucket, number>>>({});
 
   // Seed categorical defaults from the dropdown catalog once it loads (so the
@@ -76,7 +76,7 @@ export function SingleQuote() {
     const payload = transformToQuoteInput(values);
     try {
       const result = await mutate.mutateAsync(payload);
-      setPrediction(result);
+      setResult(result);
       setQuotedHoursByBucket(quoted);
       // Scroll to results once rendered.
       requestAnimationFrame(() => {
@@ -106,9 +106,9 @@ export function SingleQuote() {
         form={form}
       />
 
-      {prediction && (
+      {result && (
         <div id="quote-results">
-          <QuoteResults prediction={prediction} quotedHoursByBucket={quotedHoursByBucket} />
+          <QuoteResults result={result} quotedHoursByBucket={quotedHoursByBucket} />
         </div>
       )}
     </>
