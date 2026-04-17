@@ -1,4 +1,3 @@
-// frontend/src/pages/single-quote/ResultTabs.tsx
 import { useState } from "react";
 import { ExplainedQuoteResponse } from "@/api/types";
 import { EstimateTab } from "./tabs/EstimateTab";
@@ -31,10 +30,7 @@ export function ResultTabs({
 
   return (
     <div className="card">
-      <div
-        role="tablist"
-        className="flex border-b border-border dark:border-border-dark px-1 sm:px-2"
-      >
+      <div role="tablist" className="flex items-center border-b hairline">
         {TABS.map((t) => {
           const selected = active === t.id;
           return (
@@ -44,17 +40,17 @@ export function ResultTabs({
               aria-selected={selected}
               onClick={() => setActive(t.id)}
               className={
-                "inline-flex items-center gap-1.5 px-3 sm:px-4 py-2.5 text-sm transition-colors border-b-2 -mb-px " +
+                "flex-1 px-4 py-3 text-sm border-b-2 -mb-px transition-colors inline-flex items-center gap-1.5 justify-center " +
                 (selected
-                  ? "text-ink font-semibold border-teal"
-                  : "text-muted border-transparent hover:text-ink")
+                  ? "border-teal text-ink font-medium"
+                  : "border-transparent text-muted hover:text-ink")
               }
             >
               <span>{t.label}</span>
               {t.id === "scenarios" && scenarios.length > 0 && (
                 <span
                   aria-label={`${scenarios.length} saved`}
-                  className="inline-flex items-center justify-center min-w-[1.25rem] h-5 text-[10px] font-medium bg-teal text-white rounded-full px-1.5 leading-none"
+                  className="mono text-[10px] bg-ink text-white rounded-full w-4 h-4 grid place-items-center"
                 >
                   {scenarios.length}
                 </span>
