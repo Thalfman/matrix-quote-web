@@ -64,4 +64,42 @@ describe("LatestQuotesTable", () => {
     // Intl formats 1500 as "1,500"
     expect(screen.getByText("1,500")).toBeInTheDocument();
   });
+
+  it("renders a row-count badge showing the number of rows", () => {
+    const makeRow = (id: string, name: string) => ({
+      id,
+      name,
+      project_name: "Proj",
+      client_name: null,
+      industry_segment: "Auto",
+      hours: 100,
+      range_low: 80,
+      range_high: 120,
+      created_at: "2026-01-01T00:00:00Z",
+      created_by: "T",
+    });
+    const rows = [makeRow("a", "A"), makeRow("b", "B"), makeRow("c", "C")];
+    renderWithProviders(<LatestQuotesTable rows={rows} />);
+    expect(screen.getByText("3 rows")).toBeInTheDocument();
+  });
+
+  it("the 'See all saved quotes' link points to /quotes", () => {
+    const rows = [
+      {
+        id: "q1",
+        name: "Project X",
+        project_name: "Corp",
+        client_name: null,
+        industry_segment: "Auto",
+        hours: 200,
+        range_low: 160,
+        range_high: 240,
+        created_at: "2026-01-01T00:00:00Z",
+        created_by: "T",
+      },
+    ];
+    renderWithProviders(<LatestQuotesTable rows={rows} />);
+    const link = screen.getByRole("link", { name: /see all saved quotes/i });
+    expect(link).toHaveAttribute("href", "/quotes");
+  });
 });

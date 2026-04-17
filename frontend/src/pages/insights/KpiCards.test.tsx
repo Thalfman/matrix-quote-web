@@ -46,4 +46,32 @@ describe("KpiCards", () => {
     expect(screen.getByText(/overall mape/i)).toBeInTheDocument();
     expect(screen.getByText(/confidence calibration/i)).toBeInTheDocument();
   });
+
+  it("renders the amber stripe span (aria-hidden) only on the Confidence calibration card", () => {
+    const { container } = renderWithProviders(<KpiCards data={undefined} />);
+    // There should be exactly one aria-hidden stripe across all four cards
+    const stripes = container.querySelectorAll('[aria-hidden="true"]');
+    expect(stripes).toHaveLength(1);
+    // That stripe's closest card should contain the "Confidence calibration" label
+    const cardEl = stripes[0].closest(".card");
+    expect(cardEl).not.toBeNull();
+    expect(cardEl!.textContent).toMatch(/confidence calibration/i);
+  });
+
+  it("renders the '/ 12' suffix on the Models trained card with custom target", () => {
+    const data = {
+      active_quotes_30d: 0,
+      models_trained: 5,
+      models_target: 15,
+      overall_mape: null,
+      calibration_within_band_pct: null,
+      quotes_activity: [],
+      latest_quotes: [],
+      accuracy_heatmap: [],
+      operations: [],
+      quarters: [],
+    };
+    renderWithProviders(<KpiCards data={data} />);
+    expect(screen.getByText("/ 15")).toBeInTheDocument();
+  });
 });

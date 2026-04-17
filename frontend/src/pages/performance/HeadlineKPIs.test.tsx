@@ -39,4 +39,15 @@ describe("HeadlineKPIs", () => {
     expect(screen.getByText(/within ±10%/i)).toBeInTheDocument();
     expect(screen.getByText(/within ±20%/i)).toBeInTheDocument();
   });
+
+  it("renders the amber stripe span (aria-hidden) only on the Overall MAPE card", () => {
+    const { container } = renderWithProviders(<HeadlineKPIs head={undefined} />);
+    // Exactly one aria-hidden stripe across the three cards
+    const stripes = container.querySelectorAll('[aria-hidden="true"]');
+    expect(stripes).toHaveLength(1);
+    // That stripe belongs to the MAPE card
+    const cardEl = stripes[0].closest(".card");
+    expect(cardEl).not.toBeNull();
+    expect(cardEl!.textContent).toMatch(/overall mape/i);
+  });
 });

@@ -30,4 +30,18 @@ describe("QuotesActivityChart", () => {
     renderWithProviders(<QuotesActivityChart rows={rows} />);
     expect(screen.getByText(/quotes per week/i)).toBeInTheDocument();
   });
+
+  it("renders empty-state text 'No quote activity yet.' when rows is empty", () => {
+    renderWithProviders(<QuotesActivityChart rows={[]} />);
+    expect(screen.getByText(/no quote activity yet/i)).toBeInTheDocument();
+  });
+
+  it("renders the full eyebrow heading 'Quotes per week · last 26' when given 26 rows", () => {
+    const rows: [string, number][] = Array.from({ length: 26 }, (_, i) => [
+      `2026-W${String(i + 1).padStart(2, "0")}`,
+      i + 1,
+    ]);
+    renderWithProviders(<QuotesActivityChart rows={rows} />);
+    expect(screen.getByText(/quotes per week · last 26/i)).toBeInTheDocument();
+  });
 });
