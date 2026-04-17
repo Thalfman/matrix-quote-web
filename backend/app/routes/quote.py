@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import io
+from datetime import datetime
 
 import pandas as pd
 from core.config import QUOTE_CAT_FEATURES, QUOTE_NUM_FEATURES
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response, StreamingResponse
 from service.predict_lib import predict_quote, predict_quotes_df
 
 from .. import storage
-from ..schemas_api import ExplainedQuoteResponse, QuoteInput
+from ..pdf import render_quote_pdf
+from ..schemas_api import AdHocPdfRequest, ExplainedQuoteResponse, QuoteInput, SavedQuote
 
 router = APIRouter(prefix="/api/quote", tags=["quote"])
 
@@ -108,4 +110,22 @@ def batch_quote(
         iter([buf.getvalue()]),
         media_type="text/csv",
         headers={"Content-Disposition": 'attachment; filename="quote_predictions.csv"'},
+    )
+
+
+@router.post("/pdf")
+def adhoc_pdf(payload: AdHocPdfRequest) -> Response:
+    # Build a transient SavedQuote so the template doesn't need to branch.
+    now = datetime.utcnow()
+    transient = SavedQuote(
+        id="adhoc",
+        created_at=now,
+        **payload.model_dump(),
+    )
+    pdf_bytes = render_quote_pdf(transient, quote_number=f"{now:%Y%m%d}-{now:%H%M}")
+    fname = f"Matrix-Quote-{payload.project_name.replace(' ', '-')}-{now:%Y%m%d}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{fname}"'},
     )

@@ -51,6 +51,7 @@ __all__ = [
     "SavedQuote",
     "SavedQuoteSummary",
     "SavedQuoteList",
+    "AdHocPdfRequest",
 ]
 
 
@@ -249,3 +250,12 @@ class SavedQuoteSummary(BaseModel):
 class SavedQuoteList(BaseModel):
     total: int
     rows: list[SavedQuoteSummary]
+
+
+class AdHocPdfRequest(BaseModel):
+    name: str = "Draft"
+    project_name: str = "Untitled project"
+    client_name: str | None = None
+    created_by: str = "Anonymous"
+    inputs: QuoteInput
+    prediction: QuotePrediction

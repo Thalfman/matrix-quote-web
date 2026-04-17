@@ -1,9 +1,12 @@
 # backend/app/routes/quotes.py
 from __future__ import annotations
 
+from datetime import datetime
+
 from fastapi import APIRouter, HTTPException, Response, status
 
 from .. import quotes_storage
+from ..pdf import render_quote_pdf
 from ..schemas_api import (
     SavedQuote,
     SavedQuoteCreate,
@@ -28,6 +31,24 @@ def list_quotes(
 @router.post("", response_model=SavedQuote, status_code=status.HTTP_201_CREATED)
 def create_quote(payload: SavedQuoteCreate) -> SavedQuote:
     return quotes_storage.create(payload)
+
+
+def _quote_number(created_at: datetime) -> str:
+    return f"{created_at:%Y%m%d}-{created_at:%H%M}"
+
+
+@router.get("/{quote_id}/pdf")
+def get_quote_pdf(quote_id: str) -> Response:
+    q = quotes_storage.get(quote_id)
+    if q is None:
+        raise HTTPException(status_code=404, detail="Quote not found")
+    pdf_bytes = render_quote_pdf(q, quote_number=_quote_number(q.created_at))
+    fname = f"Matrix-Quote-{q.project_name.replace(' ', '-')}-{q.created_at:%Y%m%d}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{fname}"'},
+    )
 
 
 @router.get("/{quote_id}", response_model=SavedQuote)
