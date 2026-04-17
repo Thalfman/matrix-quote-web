@@ -1,4 +1,3 @@
-// Bidirectional amber/teal SHAP driver bars radiating from a center axis with a legend.
 import { useState } from "react";
 import { OperationDrivers } from "@/api/types";
 

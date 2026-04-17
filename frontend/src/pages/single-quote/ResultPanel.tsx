@@ -1,4 +1,3 @@
-// Sticky right-column card: HeroEstimate + ResultTabs + outlined Save and solid-teal Export actions.
 import { Download, Save } from "lucide-react";
 import { ExplainedQuoteResponse } from "@/api/types";
 import { HeroEstimate } from "./HeroEstimate";

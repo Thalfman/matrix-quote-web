@@ -1,4 +1,3 @@
-// Left-column quote form; submit bar is solid ink with amber ↵ / ⌘↵ hint kbds; button label is "Regenerate estimate".
 import React, { useState } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
 

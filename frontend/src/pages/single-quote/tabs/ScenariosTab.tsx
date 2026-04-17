@@ -1,4 +1,3 @@
-// Session scenario list; current scenario ringed in teal/30, each row has an outlined Compare pill.
 import { Scenario } from "../Scenario";
 
 function formatHours(n: number): string {
