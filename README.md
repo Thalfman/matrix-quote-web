@@ -1,6 +1,6 @@
 # Matrix Quote Web
 
-Full-stack web application that wraps the Matrix per-operation Gradient Boosting quoting engine from `matrix_quote_app/`. Customer-facing single/batch quote estimator plus a password-protected admin console for training and data exploration.
+Full-stack web application that wraps the Matrix per-operation Gradient Boosting quoting engine from `matrix_quote_app/`. Customer-facing single-quote estimator (with a batch upload shell — inference not yet wired) plus a password-protected admin console for training and data exploration. Supports a persistent light/dark theme toggle.
 
 ## Stack
 
@@ -26,7 +26,7 @@ matrix-quote-web/
 │           ├── metrics.py      # /api/metrics/* — headline + history + calibration + GET /api/demo/status
 │           ├── insights.py     # /api/insights/overview — executive KPI snapshot
 │           └── admin.py        # admin-guarded routes incl. POST /api/admin/demo/load
-├── frontend/        # Vite SPA (Inter font, Matrix navy/electric-blue palette)
+├── frontend/        # Vite SPA (Barlow Condensed + JetBrains Mono + Inter; ink/paper/teal/amber design system; light/dark overlay)
 ├── demo_assets/     # committed synthetic dataset + pretrained models for demo mode
 │   ├── data/master/projects_master.parquet  # 300-row synthetic master
 │   └── models/     # 12 *.joblib bundles, metrics_summary.csv, metrics_history.parquet, calibration.parquet
@@ -100,6 +100,44 @@ npm run dev
 
 The Vite dev server proxies `/api/*` to `http://localhost:8000`.
 
+#### Dark mode
+
+The app ships a CSS overlay at `frontend/src/styles/dark-mode.css` (imported in `main.tsx`). Dark mode activates by setting `data-theme="dark"` on the root `<html>` element. No Tailwind `dark:` class variants are used — the overlay remaps `.bg-paper`, `.card`, `.text-ink`, sidebar tokens, inputs, and shadows directly.
+
+A floating `ThemeToggle` pill (bottom-left of every page, rendered once in `Layout.tsx`) toggles between LIGHT and DARK. The user's choice is persisted in `localStorage` under the key `matrix-theme` and restored on next load.
+
+#### Tailwind design tokens
+
+The active token palette is defined in `frontend/tailwind.config.ts` (note: `.ts`, not `.js` — the `.js` artifact in the same directory is a build output and is gitignored from config tracking). The current color families are:
+
+| Family | Purpose |
+|--------|---------|
+| `ink`, `ink2` | Primary text / interactive ink |
+| `paper`, `surface` | Page and card backgrounds |
+| `line`, `line2` | Hairlines and dividers |
+| `muted`, `muted2` | Secondary / supporting text |
+| `amber`, `amberSoft` | Accent / highlight |
+| `teal`, `tealDark`, `tealSoft` | Brand primary |
+| `success`, `warning`, `danger` | Semantic states |
+| `bg`, `border` | Compat shims for `body`/`border-border` utilities |
+
+The legacy `brand`, `navy`, `steel`, and `accent` color families were removed as part of the Plan 7 redesign. Any historical code or PR comments referencing those names should map to the table above: `bg-brand` → `bg-teal`, `bg-navy-900` → `bg-ink`, `bg-steel-100` → `bg-paper`, `text-accent` → `text-teal`.
+
+#### PDF template
+
+The WeasyPrint PDF template lives in `backend/app/templates/`. The Jinja variables the template expects are:
+
+| Variable | Type | Description |
+|----------|------|-------------|
+| `quote` | `SavedQuote` / `AdHocPdfRequest` | Full quote object (project name, client name, prediction, created_by) |
+| `quote_number` | `str` | Human-readable quote identifier |
+| `prepared_on` | `str` | Formatted date string |
+| `input_rows` | `list[tuple[str, str]]` | Label/value pairs for the input summary table |
+
+`format_hours` and `humanize_bucket` are injected into the Jinja environment by `_render_env` in `backend/app/pdf.py` — they are not passed as template variables.
+
+The template renders in the Matrix ink (`#0D1B2A`) + amber (`#F2B61F`) + teal (`#1F8FA6`) + hairline (`#E5E1D8`) palette. Page 1 has a 3pt ink top band followed by a 1.5pt amber band. Numeric cells use JetBrains Mono with `font-variant-numeric: tabular-nums`. The confidence range label reads "90% CI".
+
 ### Demo mode
 
 Set `ENABLE_DEMO=1` with an empty `DATA_DIR` to seed a synthetic dataset + pretrained models at startup:
@@ -147,7 +185,7 @@ The Single Quote page (`/`) uses a two-column CSS-grid workspace on `≥lg` view
 
 **Save Scenario flow:** the "Save scenario" button prompts for a name and project name, then calls `POST /api/quotes` and toasts on success. The `created_by` field is populated from the browser display name captured via `frontend/src/lib/displayName.ts` (stored in `localStorage`; the user is prompted once on first save). The "Compare" button navigates to `/quotes` where saved scenarios can be bulk-selected.
 
-**Export PDF (ad-hoc):** the "Export PDF" button in the cockpit result panel prompts for a project name, then calls `POST /api/quote/pdf` and triggers a browser download — no save required. The PDF is a 3-page Matrix-branded document: cover with headline estimate, per-bucket breakdown + input summary, and assumptions/disclaimers.
+**Export PDF (ad-hoc):** the "Export PDF" button in the cockpit result panel prompts for a project name, then calls `POST /api/quote/pdf` and triggers a browser download — no save required. The PDF is a 3-page Matrix-branded document: cover with headline estimate, per-bucket breakdown + input summary, and assumptions/disclaimers. The WeasyPrint template renders in the Matrix ink/amber/teal palette with JetBrains Mono tabular numerics; see [PDF template](#pdf-template) for details on the Jinja variables.
 
 ### Saved Quotes (`/quotes`)
 
@@ -162,16 +200,30 @@ Side-by-side view for 2–3 saved scenarios:
 - Input-diff table showing only fields that differ between scenarios.
 - Drivers strip (placeholder until drivers are persisted with each saved quote in a follow-up).
 
+### Executive Overview (`/insights`)
+
+Four KPI cards rendered with display-hero numerics (Barlow Condensed, large weight): Active Quotes, Model Readiness, Overall MAPE, and Confidence Calibration. The Overall MAPE and Confidence Calibration cards carry an amber left-border stripe to draw attention to the accuracy signals. Below the cards, a `QuotesActivityChart` renders 26 weeks of quote volume as ink-filled bars with the current week highlighted in amber. A `LatestQuotesTable` shows the five most recent saved quotes in a grid-row layout with mono tnum columns for hours and range. An `AccuracyHeatmap` presents per-operation MAPE in a teal-tint ramp (low error = light teal, high error = deep teal) with mono axis labels. Each visual group is introduced by an eyebrow section label (small-caps, spaced tracking).
+
+### Estimate Accuracy (`/performance`)
+
+`HeadlineKPIs` repeats the Overall MAPE card with its amber stripe alongside Calibration Band %. `MapeByOperation` renders per-operation MAPE as a horizontal bar chart in ink with mono axis labels — the bar fill is uniform ink, not color-coded, so the length alone encodes magnitude. `CalibrationScatter` plots predicted-vs-actual hours as a scatter with a `y=x` reference line (dashed amber); dots above the line are teal (over-estimate) and dots below are rose/danger (under-estimate). `TrainingHistoryChart` shows MAPE over training runs as a teal line chart with an amber hover dot; its eyebrow reads "MAPE · over time" (not "Training history", which is reserved for the outer section label). All four charts share a common `chartTheme.ts` that exports palette constants and axis defaults to keep the two dashboards visually consistent.
+
 ### Frontend routes
 
 | Path | Component | Description |
 |------|-----------|-------------|
 | `/` | `SingleQuote` | Two-column estimator cockpit |
-| `/batch` | `BatchQuotes` | CSV bulk quoting |
+| `/batch` | `BatchQuotes` | Upload shell: dropzone, CSV schema reference panel, and placeholder recent-batches list (`BatchDropzone`, `BatchSchemaRef`, `BatchRecentList`). Drop/select toasts a stub message; no batch inference endpoint is wired yet. |
 | `/quotes` | `Quotes` | Saved scenarios list |
 | `/quotes/compare` | `Compare` | Side-by-side scenario comparison |
 | `/performance` | `ModelPerformance` | Estimate accuracy dashboard |
 | `/insights` | `ExecutiveOverview` | Executive KPI overview (activity chart, MAPE heatmap) |
-| `/admin/*` | Admin pages | Upload, train, data explorer (auth-gated); Upload & Train includes "Load demo data" button |
+| `/admin/login` | `AdminLogin` | Auth gate — amber top stripe, teal "Admin · access" eyebrow, ink submit button. Fully functional. |
+| `/admin` | `AdminOverview` | 4 KPI cards (Models ready, Training rows, API uptime 30d, Open flags), training runs table, system alerts list, data sources table. "Models ready" is live; remaining cards and tables are sample data until the admin dataset endpoint ships. |
+| `/admin/train` | `AdminTrain` | Real "Load demo data" mutation card (teal stripe, `Sparkles` icon) wrapped in a visual shell: 4-step progress rail (Upload → Validate → Train → Review), dashed upload placeholder, config panel. |
+| `/admin/data` | `AdminData` | Filter bar + summary stats row + histogram shell (SVG bars, amber middle buckets, ink flanks) + data table placeholder. Sample data from fixtures. |
+| `/admin/drivers` | `AdminDrivers` | Operation picker + global feature importance bar chart + SVG partial-dependence chart + neighbor pool config card. Sample data from fixtures. |
+
+Sample data for admin shells is sourced from `frontend/src/pages/admin/fixtures.ts`, which exports `SAMPLE_RUNS`, `SAMPLE_ALERTS`, `SAMPLE_SOURCES`, `SAMPLE_IMPORTANCE`, and `SAMPLE_HISTOGRAM` arrays typed against `TrainingRun`, `AdminAlert`, `DataSource`, `FeatureImportance`, and histogram bucket interfaces. Each card header labels its content "sample data" so the placeholder state is visually explicit.
 
 Compare-PDF (multi-scenario) is deferred per spec; only single-quote PDFs are supported.

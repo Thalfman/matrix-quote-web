@@ -27,13 +27,13 @@ export function UserPill() {
           setName(next.trim());
         }
       }}
-      className="inline-flex items-center gap-2 text-sm text-muted hover:text-ink transition-colors"
+      className="inline-flex items-center gap-2 text-xs text-muted hover:text-ink transition-colors"
       aria-label="Edit display name"
     >
-      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-accent/10 text-ink text-xs font-semibold">
+      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-ink text-white text-[10px] font-semibold">
         {initials(name || "Guest")}
       </span>
-      <span className="hidden sm:inline">{name || "Set name"}</span>
+      <span className="hidden sm:inline text-ink">{name || "Set name"}</span>
     </button>
   );
 }

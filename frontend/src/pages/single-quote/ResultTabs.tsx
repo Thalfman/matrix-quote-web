@@ -46,15 +46,15 @@ export function ResultTabs({
               className={
                 "inline-flex items-center gap-1.5 px-3 sm:px-4 py-2.5 text-sm transition-colors border-b-2 -mb-px " +
                 (selected
-                  ? "text-ink dark:text-ink-dark font-semibold border-brand"
-                  : "text-muted dark:text-muted-dark border-transparent hover:text-ink dark:hover:text-ink-dark")
+                  ? "text-ink font-semibold border-teal"
+                  : "text-muted border-transparent hover:text-ink")
               }
             >
               <span>{t.label}</span>
               {t.id === "scenarios" && scenarios.length > 0 && (
                 <span
                   aria-label={`${scenarios.length} saved`}
-                  className="inline-flex items-center justify-center min-w-[1.25rem] h-5 text-[10px] font-medium bg-brand text-brand-foreground rounded-full px-1.5 leading-none"
+                  className="inline-flex items-center justify-center min-w-[1.25rem] h-5 text-[10px] font-medium bg-teal text-white rounded-full px-1.5 leading-none"
                 >
                   {scenarios.length}
                 </span>

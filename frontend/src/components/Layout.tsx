@@ -5,6 +5,7 @@ import { api } from "@/api/client";
 import { HealthResponse } from "@/api/types";
 import { cn } from "@/lib/utils";
 import { DemoChip } from "@/components/DemoChip";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserPill } from "@/components/UserPill";
 
 type NavEntry = { to: string; label: string; end?: boolean };
@@ -12,18 +13,18 @@ type NavGroup = { label: string; items: NavEntry[] };
 
 const PUBLIC_NAV: NavGroup[] = [
   {
-    label: "ESTIMATE",
+    label: "Estimate",
     items: [
       { to: "/", label: "Single Quote", end: true },
       { to: "/batch", label: "Batch Quotes" },
     ],
   },
   {
-    label: "QUOTES",
+    label: "Quotes",
     items: [{ to: "/quotes", label: "Saved Quotes" }],
   },
   {
-    label: "INSIGHTS",
+    label: "Insights",
     items: [
       { to: "/performance", label: "Estimate Accuracy" },
       { to: "/insights", label: "Executive Overview" },
@@ -32,7 +33,7 @@ const PUBLIC_NAV: NavGroup[] = [
 ];
 
 const ADMIN_NAV: NavGroup = {
-  label: "ADMIN",
+  label: "Admin",
   items: [
     { to: "/admin", label: "Overview", end: true },
     { to: "/admin/train", label: "Upload & Train" },
@@ -54,17 +55,24 @@ export function Layout() {
   const groups = isAdminRoute ? [ADMIN_NAV] : PUBLIC_NAV;
   const modelsReady = health?.models_ready ?? false;
 
+  // Breadcrumb derives label from the active nav entry.
+  const allEntries = [...PUBLIC_NAV.flatMap((g) => g.items), ...ADMIN_NAV.items];
+  const active = allEntries.find((e) =>
+    e.end ? pathname === e.to : pathname.startsWith(e.to),
+  );
+  const sectionLabel = isAdminRoute ? "Admin" : "Estimate";
+
   return (
-    <div className="min-h-screen flex">
-      <aside className="hidden lg:flex w-60 shrink-0 flex-col border-r border-border dark:border-border-dark p-6 gap-8">
+    <div className="min-h-screen flex bg-paper">
+      <aside className="hidden lg:flex w-60 shrink-0 flex-col bg-ink text-white p-6 gap-8">
         <div>
-          <div className="text-xs tracking-widest muted">MATRIX</div>
-          <div className="text-lg font-medium">Quote Estimation</div>
+          <div className="display-hero text-2xl tracking-tight leading-none">Matrix</div>
+          <div className="eyebrow text-[10px] text-white/50 mt-1">Quote Estimation</div>
         </div>
 
         {groups.map((group) => (
           <nav key={group.label} className="flex flex-col gap-1">
-            <div className="text-[10px] tracking-widest muted mb-1">{group.label}</div>
+            <div className="eyebrow text-[10px] text-white/40 mb-1 px-3">{group.label}</div>
             {group.items.map((item) => (
               <NavLink
                 key={item.to}
@@ -72,10 +80,10 @@ export function Layout() {
                 end={item.end}
                 className={({ isActive }) =>
                   cn(
-                    "text-sm px-3 py-2 rounded-md transition-colors",
+                    "text-sm px-3 py-2 rounded-sm transition-colors",
                     isActive
-                      ? "bg-accent/10 text-ink dark:text-ink-dark font-medium"
-                      : "muted hover:bg-border/50 dark:hover:bg-border-dark/50",
+                      ? "bg-white/5 border-l-2 border-amber text-white font-medium"
+                      : "text-white/60 hover:text-white hover:bg-white/5",
                   )
                 }
               >
@@ -86,44 +94,55 @@ export function Layout() {
         ))}
 
         <div className="mt-auto">
-          <div className="text-[10px] tracking-widest muted mb-2">MODEL STATUS</div>
-          <div
-            className={cn(
-              "inline-flex items-center gap-2 px-2 py-1 rounded-md text-xs",
-              modelsReady ? "bg-success/10 text-success" : "bg-warning/10 text-warning",
-            )}
-          >
-            <span
-              className={cn(
-                "w-1.5 h-1.5 rounded-full",
-                modelsReady ? "bg-success" : "bg-warning",
+          <div className="eyebrow text-[10px] text-white/40 mb-2">Model Status</div>
+          <div className="flex items-center gap-2 text-xs text-white/80">
+            <span className="relative flex w-1.5 h-1.5">
+              {modelsReady && (
+                <span className="absolute inset-0 rounded-full bg-success animate-ping opacity-60" />
               )}
-            />
-            {modelsReady ? "Ready" : "Not trained"}
+              <span
+                className={cn(
+                  "relative w-1.5 h-1.5 rounded-full",
+                  modelsReady ? "bg-success" : "bg-danger",
+                )}
+              />
+            </span>
+            {modelsReady ? "Ready · models online" : "Not trained"}
           </div>
         </div>
       </aside>
 
-      <main className="flex-1 overflow-x-hidden">
-        {/* Mobile top bar — visible only below lg breakpoint */}
-        <div className="lg:hidden flex items-center justify-between px-4 pt-4">
-          <div className="text-sm font-medium">Matrix Quote</div>
+      <main className="flex-1 min-w-0">
+        {/* Mobile top bar — below lg breakpoint */}
+        <div className="lg:hidden flex items-center justify-between px-4 py-3 border-b hairline bg-surface">
+          <div className="display-hero text-lg leading-none">Matrix</div>
           <div className="flex items-center gap-2">
             <DemoChip />
             <UserPill />
           </div>
         </div>
 
-        {/* Desktop chip + pill row — hidden on mobile */}
-        <div className="hidden lg:flex items-center justify-end gap-3 px-6 lg:px-10 pt-4">
-          <DemoChip />
-          <UserPill />
+        {/* Desktop top strip — breadcrumb + demo + user */}
+        <div className="hidden lg:block border-b hairline bg-white/60 backdrop-blur">
+          <div className="max-w-content mx-auto px-8 h-12 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2 text-muted">
+              <span>{sectionLabel}</span>
+              <span className="text-muted2">/</span>
+              <span className="text-ink font-medium">{active?.label ?? ""}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <DemoChip />
+              <span className="w-px h-4 bg-line" />
+              <UserPill />
+            </div>
+          </div>
         </div>
 
-        <div className="max-w-content mx-auto px-6 lg:px-10 py-8">
+        <div className="max-w-content mx-auto px-6 lg:px-8 py-8">
           <Outlet />
         </div>
       </main>
+      <ThemeToggle />
     </div>
   );
 }

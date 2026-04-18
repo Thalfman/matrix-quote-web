@@ -42,4 +42,21 @@ describe("Layout — INSIGHTS nav group", () => {
     expect(accuracyLink).toHaveAttribute("href", "/performance");
     expect(overviewLink).toHaveAttribute("href", "/insights");
   });
+
+  it("applies the amber active rail to the current route pill", async () => {
+    mockGet.mockImplementation(async (url: string) => {
+      if (url === "/health") return { data: { status: "ok", models_ready: true } };
+      throw new Error(`Unexpected GET ${url}`);
+    });
+
+    renderWithProviders(<Layout />);
+
+    await waitFor(() =>
+      expect(screen.getByRole("link", { name: /single quote/i })).toBeInTheDocument(),
+    );
+
+    const singleQuoteLink = screen.getByRole("link", { name: /single quote/i });
+    // Active link carries border-l-2 + border-amber (amber active rail).
+    expect(singleQuoteLink.className).toMatch(/border-amber/);
+  });
 });

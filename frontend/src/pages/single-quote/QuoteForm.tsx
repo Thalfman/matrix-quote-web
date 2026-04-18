@@ -42,7 +42,7 @@ export function QuoteForm({ dropdowns, submitting, onSubmit, form, formRef }: Pr
           <button
             type="button"
             onClick={() => form.reset(_readLastValues())}
-            className="text-xs text-brand hover:text-brand-hover hover:underline underline-offset-2 transition-colors"
+            className="text-xs text-teal hover:text-tealDark hover:underline underline-offset-2 transition-colors"
           >
             Populate with last quote
           </button>
@@ -342,7 +342,7 @@ export function QuoteForm({ dropdowns, submitting, onSubmit, form, formRef }: Pr
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-md bg-brand text-brand-foreground px-6 py-2.5 text-sm font-medium hover:bg-brand-hover active:bg-brand-pressed transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-brand"
+          className="rounded-md bg-teal text-white px-6 py-2.5 text-sm font-medium hover:bg-tealDark active:bg-tealDark transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-teal"
         >
           {submitting ? "Estimating..." : "Estimate hours"}
         </button>

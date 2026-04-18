@@ -13,14 +13,13 @@ export function Section({
 }) {
   return (
     <section className="mb-8">
-      <div className="flex items-baseline gap-3 mb-4">
-        <span className="inline-flex items-center justify-center h-6 min-w-6 px-2 rounded bg-border dark:bg-border-dark text-[11px] font-mono muted">
-          {step}
-        </span>
-        <div>
-          <h2 className="text-base font-medium">{title}</h2>
-          {description && <p className="muted text-sm">{description}</p>}
-        </div>
+      <div className="flex items-baseline gap-4 mb-3">
+        <span className="mono text-[11px] text-teal">{step}</span>
+        <h2 className="eyebrow text-[12px] text-ink">{title}</h2>
+        <span className="flex-1 h-px bg-line" />
+        {description && (
+          <span className="text-[11px] text-muted">{description}</span>
+        )}
       </div>
       <div className="card p-5">{children}</div>
     </section>

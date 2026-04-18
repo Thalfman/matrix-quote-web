@@ -29,7 +29,7 @@ export function QuotesTable({ rows, selected, onToggle, onRowAction }: Props) {
         </thead>
         <tbody>
           {rows.map((r) => (
-            <tr key={r.id} className="border-b last:border-0 border-border hover:bg-steel-100/60">
+            <tr key={r.id} className="border-b last:border-0 border-border hover:bg-paper/60">
               <td className="px-3 py-2">
                 <input
                   type="checkbox"
@@ -55,13 +55,13 @@ export function QuotesTable({ rows, selected, onToggle, onRowAction }: Props) {
               <td className="px-3 py-2 text-right">
                 <div className="inline-flex gap-2 text-xs">
                   <button
-                    className="text-brand hover:underline"
+                    className="text-teal hover:underline"
                     onClick={() => onRowAction(r.id, "duplicate")}
                   >
                     Duplicate
                   </button>
                   <button
-                    className="text-brand hover:underline"
+                    className="text-teal hover:underline"
                     onClick={() => onRowAction(r.id, "pdf")}
                   >
                     PDF

@@ -11,7 +11,7 @@ export function Tabs({ tabs, defaultId }: { tabs: TabDef[]; defaultId?: string }
     <div>
       <div
         role="tablist"
-        className="flex gap-1 border-b border-border dark:border-border-dark mb-4"
+        className="flex gap-0 border-b hairline mb-4"
       >
         {tabs.map((t) => (
           <button
@@ -22,8 +22,8 @@ export function Tabs({ tabs, defaultId }: { tabs: TabDef[]; defaultId?: string }
             className={cn(
               "px-4 py-2 text-sm border-b-2 -mb-px transition-colors",
               active === t.id
-                ? "border-accent text-ink dark:text-ink-dark font-medium"
-                : "border-transparent muted hover:text-ink dark:hover:text-ink-dark",
+                ? "border-teal text-ink font-medium"
+                : "border-transparent text-muted hover:text-ink",
             )}
           >
             {t.label}

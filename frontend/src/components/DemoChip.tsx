@@ -14,7 +14,7 @@ export function DemoChip() {
   return (
     <div
       title="Demo data is loaded. Estimates and insights come from a synthetic dataset."
-      className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-brand/30 bg-brand/10 text-brand text-[11px] font-semibold"
+      className="inline-flex items-center gap-1 px-2 py-1 rounded-sm border border-teal/30 bg-tealSoft text-tealDark text-[11px] font-semibold"
     >
       <Sparkles size={12} strokeWidth={1.75} />
       Demo mode

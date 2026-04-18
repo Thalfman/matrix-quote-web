@@ -27,6 +27,6 @@ describe("TrainingHistoryChart", () => {
       { run_id: "run-2", trained_at: "2026-02-14T00:00:00Z", rows: 250, overall_mape: 11.2 },
     ];
     renderWithProviders(<TrainingHistoryChart rows={rows} />);
-    expect(screen.getByText(/training history/i)).toBeInTheDocument();
+    expect(screen.getByText(/mape.*over time/i)).toBeInTheDocument();
   });
 });

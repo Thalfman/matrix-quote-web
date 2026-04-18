@@ -50,7 +50,7 @@ export function SimilarTab({
                     key={k}
                     className={
                       "w-1.5 h-1.5 rounded-full " +
-                      (k <= dots ? "bg-brand" : "bg-steel-300 dark:bg-steel-600")
+                      (k <= dots ? "bg-teal" : "bg-line2")
                     }
                   />
                 ))}

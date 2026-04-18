@@ -19,10 +19,10 @@ export const Slider = forwardRef<HTMLInputElement, Props>(function Slider(
         max={max}
         step={step}
         value={value}
-        className={cn("flex-1 accent-accent", className)}
+        className={cn("flex-1 accent-teal", className)}
         {...rest}
       />
-      <span className="numeric text-sm tabular-nums min-w-[3ch] text-right">
+      <span className="mono text-sm tabular-nums min-w-[3ch] text-right text-ink">
         {value}
         {unit ?? ""}
       </span>

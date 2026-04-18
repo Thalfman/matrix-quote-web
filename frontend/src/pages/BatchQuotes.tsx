@@ -1,15 +1,24 @@
 import { PageHeader } from "@/components/PageHeader";
-import { EmptyState } from "@/components/EmptyState";
+
+import { BatchDropzone } from "./batch/BatchDropzone";
+import { BatchRecentList } from "./batch/BatchRecentList";
+import { BatchSchemaRef } from "./batch/BatchSchemaRef";
 
 export function BatchQuotes() {
   return (
     <>
       <PageHeader
-        eyebrow="Estimate"
+        eyebrow="Estimate · Batch"
         title="Batch Quotes"
-        description="Upload a CSV or Excel file with many project rows and get predictions for all of them in one pass."
+        description="Upload a CSV or XLSX with project rows and get predictions for all of them in one pass. Batch inference lands in a later slice — this page previews the upload flow."
       />
-      <EmptyState title="Batch upload pending" body="File input and results table land in a later slice." />
+
+      <div className="grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-6 mb-8">
+        <BatchDropzone />
+        <BatchSchemaRef />
+      </div>
+
+      <BatchRecentList />
     </>
   );
 }

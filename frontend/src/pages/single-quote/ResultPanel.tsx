@@ -56,7 +56,7 @@ export function ResultPanel({
         <button
           type="button"
           onClick={onSaveScenario}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-brand text-brand-foreground text-sm font-medium hover:bg-brand-hover active:bg-brand-pressed transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-teal text-white text-sm font-medium hover:bg-tealDark active:bg-tealDark transition-colors"
         >
           <Save size={16} strokeWidth={1.75} aria-hidden="true" />
           Save scenario
@@ -64,7 +64,7 @@ export function ResultPanel({
         <button
           type="button"
           onClick={onExportPdf}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-border dark:border-border-dark text-ink dark:text-ink-dark text-sm font-medium hover:bg-steel-100 dark:hover:bg-surface-dark/60 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-border text-ink text-sm font-medium hover:bg-paper transition-colors"
         >
           <Download size={16} strokeWidth={1.75} aria-hidden="true" />
           Export PDF
