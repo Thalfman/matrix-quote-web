@@ -11,7 +11,6 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from .schemas_api import SavedQuote
 
-
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 
 

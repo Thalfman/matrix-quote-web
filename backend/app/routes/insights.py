@@ -16,7 +16,6 @@ from .. import insights, quotes_storage, storage
 from ..paths import calibration_path, metrics_history_path
 from ..schemas_api import InsightsOverview
 
-
 router = APIRouter(prefix="/api/insights", tags=["insights"])
 
 
@@ -34,7 +33,8 @@ def overview() -> InsightsOverview:
     quotes_df = _quotes_as_df()
 
     calibration_df = pd.read_parquet(calibration_path()) if calibration_path().exists() else None
-    history_df = pd.read_parquet(metrics_history_path()) if metrics_history_path().exists() else None
+    history_path = metrics_history_path()
+    history_df = pd.read_parquet(history_path) if history_path.exists() else None
 
     cur = storage.read_metrics()
     overall_mape = None

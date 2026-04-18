@@ -21,7 +21,6 @@ from ..schemas_api import (
     DemoStatus,
     DropdownOptions,
     HealthResponse,
-    MapeRow,
     MetricRow,
     MetricsSummary,
     PerformanceHeadline,
@@ -115,9 +114,13 @@ def metrics_calibration() -> list[CalibrationPoint]:
 def metrics_headline() -> PerformanceHeadline:
     head = PerformanceHeadline()
     cur = storage.read_metrics()
-    if cur is not None and not cur.empty:
-        if "mape" in cur.columns and cur["mape"].notna().any():
-            head.overall_mape = float(cur["mape"].mean())
+    if (
+        cur is not None
+        and not cur.empty
+        and "mape" in cur.columns
+        and cur["mape"].notna().any()
+    ):
+        head.overall_mape = float(cur["mape"].mean())
     path = calibration_path()
     if path.exists():
         df = pd.read_parquet(path)

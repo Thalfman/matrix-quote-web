@@ -7,11 +7,11 @@ slices fill them in per the approved plan.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from .. import demo
 from ..deps import (
     Settings,
     create_admin_token,
@@ -19,7 +19,6 @@ from ..deps import (
     require_admin,
     verify_admin_password,
 )
-from .. import demo
 from ..schemas_api import (
     DatasetPage,
     DemoLoadResponse,
@@ -49,44 +48,54 @@ def login(
     return LoginResponse(token=token, expires_at=expires_at)
 
 
+_NOT_IMPLEMENTED_DETAIL = "Pending vertical slice"
+
+
+def _not_implemented() -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_501_NOT_IMPLEMENTED,
+        detail=_NOT_IMPLEMENTED_DETAIL,
+    )
+
+
 @router.post("/train/preview", response_model=TrainPreviewResponse)
 def train_preview(_: str = Depends(require_admin)) -> TrainPreviewResponse:
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Pending vertical slice")
+    raise _not_implemented()
 
 
 @router.post("/train", response_model=TrainResponse)
 def train(_: str = Depends(require_admin)) -> TrainResponse:
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Pending vertical slice")
+    raise _not_implemented()
 
 
 @router.get("/dataset", response_model=DatasetPage)
 def dataset(_: str = Depends(require_admin)) -> DatasetPage:
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Pending vertical slice")
+    raise _not_implemented()
 
 
 @router.get("/drivers/{op}", response_model=DriversResponse)
 def drivers(op: str, _: str = Depends(require_admin)) -> DriversResponse:
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Pending vertical slice")
+    raise _not_implemented()
 
 
 @router.post("/similar", response_model=SimilarResponse)
 def similar(body: SimilarRequest, _: str = Depends(require_admin)) -> SimilarResponse:
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Pending vertical slice")
+    raise _not_implemented()
 
 
 @router.get("/overview", response_model=OverviewResponse)
 def overview(_: str = Depends(require_admin)) -> OverviewResponse:
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Pending vertical slice")
+    raise _not_implemented()
 
 
 @router.post("/reset/prepare", response_model=ResetPrepareResponse)
 def reset_prepare(_: str = Depends(require_admin)) -> ResetPrepareResponse:
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Pending vertical slice")
+    raise _not_implemented()
 
 
 @router.post("/reset")
 def reset(body: ResetRequest, _: str = Depends(require_admin)) -> dict:
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Pending vertical slice")
+    raise _not_implemented()
 
 
 @router.post("/demo/load", response_model=DemoLoadResponse)

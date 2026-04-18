@@ -71,7 +71,7 @@ def _read_upload(file: UploadFile, sheet: str | None) -> pd.DataFrame:
 
 
 @router.post("/batch/preview")
-def batch_preview(file: UploadFile = File(...)) -> dict:
+def batch_preview(file: UploadFile = File(...)) -> dict:  # noqa: B008
     raw = file.file.read()
     if len(raw) > MAX_UPLOAD_BYTES:
         raise HTTPException(status_code=413, detail="File too large (max 10 MB).")
@@ -86,7 +86,7 @@ def batch_preview(file: UploadFile = File(...)) -> dict:
 
 @router.post("/batch")
 def batch_quote(
-    file: UploadFile = File(...),
+    file: UploadFile = File(...),  # noqa: B008
     sheet: str | None = Form(None),
 ) -> StreamingResponse:
     if not storage.models_ready():

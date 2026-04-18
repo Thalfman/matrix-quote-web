@@ -10,14 +10,13 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field
-
 from core.schemas import (  # re-export
     OpPrediction,
     QuoteInput,
     QuotePrediction,
     SalesBucketPrediction,
 )
+from pydantic import BaseModel, Field
 
 __all__ = [
     "OpPrediction",

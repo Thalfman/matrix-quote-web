@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import hmac
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from functools import lru_cache
 from typing import Annotated
 
@@ -40,7 +40,7 @@ JWT_ALGORITHM = "HS256"
 
 
 def create_admin_token(settings: Settings) -> tuple[str, datetime]:
-    expires_at = datetime.now(timezone.utc) + timedelta(
+    expires_at = datetime.now(UTC) + timedelta(
         hours=settings.admin_token_expiry_hours
     )
     claims = {"sub": "admin", "exp": expires_at}
@@ -74,5 +74,8 @@ def require_admin(
             headers={"WWW-Authenticate": "Bearer"},
         ) from exc
     if claims.get("sub") != "admin":
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token subject")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token subject",
+        )
     return "admin"

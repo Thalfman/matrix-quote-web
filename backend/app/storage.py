@@ -6,6 +6,7 @@ touches `os.path.join`) and normalize NaN → None for JSON-safe responses.
 
 from __future__ import annotations
 
+import contextlib
 from typing import Any
 
 import numpy as np
@@ -81,10 +82,8 @@ def reset_all() -> None:
     md = models_dir()
     if md.exists():
         for joblib_file in md.glob("*.joblib"):
-            try:
+            with contextlib.suppress(OSError):
                 joblib_file.unlink()
-            except OSError:
-                pass
 
 
 def df_to_jsonable_records(df: pd.DataFrame) -> list[dict[str, Any]]:
