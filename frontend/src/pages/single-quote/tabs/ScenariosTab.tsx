@@ -1,4 +1,3 @@
-// frontend/src/pages/single-quote/tabs/ScenariosTab.tsx
 import { Scenario } from "../Scenario";
 
 function formatHours(n: number): string {
@@ -16,63 +15,79 @@ export function ScenariosTab({
 }) {
   if (scenarios.length === 0) {
     return (
-      <div className="text-sm text-muted dark:text-muted-dark">
+      <div className="text-sm text-muted">
         No scenarios saved yet this session. Click{" "}
-        <span className="text-ink dark:text-ink-dark font-medium">Save scenario</span>{" "}
-        to start building a comparison.
+        <span className="text-ink font-medium">Save scenario</span> to start building a
+        comparison.
       </div>
     );
   }
 
   const canCompare = scenarios.length >= 2;
+  // "Current" = the most recently added scenario.
+  const currentId = scenarios[scenarios.length - 1]?.id;
 
   return (
-    <div className="space-y-3">
+    <div>
+      <div className="eyebrow text-[10px] text-muted mb-3">Saved this session</div>
       <div className="space-y-2">
-        {scenarios.map((s) => (
-          <div
-            key={s.id}
-            className="card p-3 flex items-center gap-3 hover:border-line2 transition-colors"
-          >
-            <div className="flex-1 min-w-0">
-              <div className="font-medium text-ink dark:text-ink-dark truncate">{s.name}</div>
-              <div className="text-xs text-muted dark:text-muted-dark">
-                {new Date(s.createdAt).toLocaleString()}
-              </div>
-            </div>
-            <div className="numeric text-sm text-ink dark:text-ink-dark shrink-0">
-              {formatHours(s.result.prediction.total_p50)} hrs
-            </div>
-            <button
-              type="button"
-              onClick={() => onRemove(s.id)}
-              className="text-xs text-muted dark:text-muted-dark hover:text-danger transition-colors shrink-0"
+        {scenarios.map((s) => {
+          const isCurrent = s.id === currentId;
+          return (
+            <div
+              key={s.id}
+              className={
+                "border hairline rounded-sm px-3 py-2.5 flex items-center gap-3 " +
+                (isCurrent ? "ring-1 ring-teal/30" : "")
+              }
             >
-              Remove
-            </button>
-          </div>
-        ))}
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium truncate text-ink">
+                  {s.name}
+                  {isCurrent && (
+                    <span className="mono text-[10px] text-teal ml-2">current</span>
+                  )}
+                </div>
+                <div className="text-[11px] text-muted mono">
+                  {new Date(s.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </div>
+              </div>
+              <div className="mono tnum text-sm text-ink">
+                {formatHours(s.result.prediction.total_p50)}
+              </div>
+              <span className="text-[11px] text-muted">hrs</span>
+              <button
+                type="button"
+                onClick={() => onRemove(s.id)}
+                className="text-[11px] text-muted hover:text-danger transition-colors ml-2"
+              >
+                Remove
+              </button>
+            </div>
+          );
+        })}
       </div>
-      <div className="flex items-center gap-2 pt-1">
-        <button
-          type="button"
-          onClick={onCompare}
-          disabled={!canCompare}
-          className={
-            "inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors " +
-            (canCompare
-              ? "bg-teal text-white hover:bg-tealDark"
-              : "bg-paper text-muted cursor-not-allowed")
-          }
-        >
-          Compare {scenarios.length} scenario{scenarios.length === 1 ? "" : "s"}
-        </button>
-        {!canCompare && (
-          <span className="text-xs text-muted dark:text-muted-dark">
-            need at least 2
-          </span>
-        )}
-      </div>
+      <button
+        type="button"
+        onClick={onCompare}
+        disabled={!canCompare}
+        className={
+          "mt-3 w-full text-sm py-2 rounded-sm transition-colors " +
+          (canCompare
+            ? "border border-ink text-ink hover:bg-ink hover:text-white"
+            : "border hairline text-muted cursor-not-allowed")
+        }
+      >
+        Compare {scenarios.length} scenario{scenarios.length === 1 ? "" : "s"} →
+      </button>
+      {!canCompare && (
+        <div className="mt-1 text-[11px] text-muted text-center">
+          Need at least 2 to compare
+        </div>
+      )}
     </div>
   );
 }

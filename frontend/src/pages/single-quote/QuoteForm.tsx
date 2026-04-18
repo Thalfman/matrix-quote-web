@@ -42,8 +42,9 @@ export function QuoteForm({ dropdowns, submitting, onSubmit, form, formRef }: Pr
           <button
             type="button"
             onClick={() => form.reset(_readLastValues())}
-            className="text-xs text-teal hover:text-tealDark hover:underline underline-offset-2 transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-2 text-xs border hairline rounded-sm bg-surface hover:bg-paper transition-colors"
           >
+            <span className="w-1.5 h-1.5 rounded-full bg-muted2" aria-hidden="true" />
             Populate with last quote
           </button>
         </div>
@@ -315,7 +316,7 @@ export function QuoteForm({ dropdowns, submitting, onSubmit, form, formRef }: Pr
         <button
           type="button"
           onClick={() => setCompareOpen((v) => !v)}
-          className="text-sm muted underline underline-offset-2"
+          className="eyebrow text-[11px] text-teal hover:text-tealDark"
         >
           {compareOpen ? "Hide" : "Optional:"} compare to your quoted hours
         </button>
@@ -338,35 +339,31 @@ export function QuoteForm({ dropdowns, submitting, onSubmit, form, formRef }: Pr
         )}
       </section>
 
-      <div className="flex items-center gap-3 mt-8">
+      <div className="flex items-center gap-3 pt-2 mt-8">
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-md bg-teal text-white px-6 py-2.5 text-sm font-medium hover:bg-tealDark active:bg-tealDark transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-teal"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-ink text-white text-sm font-medium rounded-sm hover:bg-ink2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {submitting ? "Estimating..." : "Estimate hours"}
+          {submitting ? "Estimating…" : "Regenerate estimate"}
+          <span className="mono text-[10px] text-amber" aria-hidden="true">↵</span>
         </button>
+        <span className="text-xs text-muted hidden md:inline">
+          Press{" "}
+          <kbd className="mono text-[10px] px-1.5 py-0.5 border hairline rounded-sm bg-surface">⌘</kbd>
+          <kbd className="mono text-[10px] px-1.5 py-0.5 border hairline rounded-sm bg-surface">↵</kbd>{" "}
+          anywhere on the page
+        </span>
         <button
           type="button"
           onClick={() => {
             reset();
             setQuotedHours({});
           }}
-          className="text-sm muted hover:text-ink dark:hover:text-ink-dark transition-colors"
+          className="ml-auto text-xs text-muted hover:text-ink transition-colors"
         >
           Reset form
         </button>
-        <span className="ml-auto hidden md:block text-xs text-muted dark:text-muted-dark">
-          Press{" "}
-          <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded border border-border dark:border-border-dark bg-bg dark:bg-bg-dark">
-            Ctrl
-          </kbd>
-          +
-          <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded border border-border dark:border-border-dark bg-bg dark:bg-bg-dark">
-            Enter
-          </kbd>{" "}
-          to submit
-        </span>
       </div>
     </form>
   );
