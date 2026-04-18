@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 
 import App from "./App";
 import "./styles/globals.css";
+import "./styles/dark-mode.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {
