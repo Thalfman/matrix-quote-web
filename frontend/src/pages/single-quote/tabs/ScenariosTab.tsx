@@ -32,7 +32,7 @@ export function ScenariosTab({
         {scenarios.map((s) => (
           <div
             key={s.id}
-            className="card p-3 flex items-center gap-3 hover:border-steel-300 dark:hover:border-steel-600 transition-colors"
+            className="card p-3 flex items-center gap-3 hover:border-line2 transition-colors"
           >
             <div className="flex-1 min-w-0">
               <div className="font-medium text-ink dark:text-ink-dark truncate">{s.name}</div>
@@ -61,8 +61,8 @@ export function ScenariosTab({
           className={
             "inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors " +
             (canCompare
-              ? "bg-brand text-brand-foreground hover:bg-brand-hover"
-              : "bg-steel-100 dark:bg-steel-700/40 text-muted dark:text-muted-dark cursor-not-allowed")
+              ? "bg-teal text-white hover:bg-tealDark"
+              : "bg-paper text-muted cursor-not-allowed")
           }
         >
           Compare {scenarios.length} scenario{scenarios.length === 1 ? "" : "s"}

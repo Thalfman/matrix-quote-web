@@ -46,7 +46,7 @@ export function HeroEstimate({ result }: { result: ExplainedQuoteResponse }) {
               key={i}
               className={
                 "w-1.5 h-1.5 rounded-full " +
-                (i <= dots ? "bg-brand" : "bg-steel-300 dark:bg-steel-600")
+                (i <= dots ? "bg-teal" : "bg-line2")
               }
             />
           ))}

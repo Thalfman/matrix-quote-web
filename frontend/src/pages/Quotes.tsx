@@ -69,7 +69,7 @@ export function Quotes() {
           type="button"
           onClick={compareSelected}
           disabled={selected.size < 2 || selected.size > 3}
-          className="px-3 py-1.5 rounded-md bg-brand text-brand-foreground text-sm disabled:bg-steel-200 disabled:text-muted disabled:cursor-not-allowed"
+          className="px-3 py-1.5 rounded-md bg-teal text-white text-sm disabled:bg-line disabled:text-muted disabled:cursor-not-allowed"
         >
           Compare {selected.size > 0 ? selected.size : ""} selected
         </button>

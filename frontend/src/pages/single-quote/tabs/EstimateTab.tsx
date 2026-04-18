@@ -36,9 +36,9 @@ export function EstimateTab({ result }: { result: ExplainedQuoteResponse }) {
             <div className="numeric w-16 text-right text-ink dark:text-ink-dark">
               {formatHours(v.p50)}
             </div>
-            <div className="flex-1 h-2 bg-steel-100 dark:bg-steel-700/40 rounded-full overflow-hidden">
+            <div className="flex-1 h-2 bg-paper rounded-full overflow-hidden">
               <div
-                className="h-full bg-brand rounded-full"
+                className="h-full bg-teal rounded-full"
                 style={{ width: `${pct}%` }}
                 aria-hidden="true"
               />

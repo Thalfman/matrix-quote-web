@@ -69,14 +69,14 @@ export function DriversTab({ drivers }: { drivers: OperationDrivers[] | null | u
               <div className="numeric w-16 text-right text-ink dark:text-ink-dark">
                 {formatSigned(d.contribution)} hrs
               </div>
-              <div className="flex-1 relative h-2 bg-steel-100 dark:bg-steel-700/40 rounded-full">
+              <div className="flex-1 relative h-2 bg-paper rounded-full">
                 <span
-                  className="absolute top-[-2px] bottom-[-2px] w-px bg-steel-400 dark:bg-steel-500"
+                  className="absolute top-[-2px] bottom-[-2px] w-px bg-muted2"
                   style={{ left: "50%" }}
                   aria-hidden="true"
                 />
                 <div
-                  className={"absolute top-0 h-2 " + (isPositive ? "bg-brand" : "bg-warning")}
+                  className={"absolute top-0 h-2 " + (isPositive ? "bg-teal" : "bg-warning")}
                   style={{
                     left: isPositive ? "50%" : `${50 - pct}%`,
                     width: `${pct}%`,
