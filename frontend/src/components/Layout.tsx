@@ -5,6 +5,7 @@ import { api } from "@/api/client";
 import { HealthResponse } from "@/api/types";
 import { cn } from "@/lib/utils";
 import { DemoChip } from "@/components/DemoChip";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserPill } from "@/components/UserPill";
 
 type NavEntry = { to: string; label: string; end?: boolean };
@@ -141,6 +142,7 @@ export function Layout() {
           <Outlet />
         </div>
       </main>
+      <ThemeToggle />
     </div>
   );
 }
