@@ -19,3 +19,5 @@ filelock>=3.13
 slowapi>=0.1.9
 shap
 weasyprint==62.3
+jinja2>=3.1
+
