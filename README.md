@@ -197,16 +197,20 @@ Press `⌘/Ctrl+Enter` from anywhere on the page to submit the form; the submit 
 
 ### Saved Quotes (`/quotes`)
 
-Filterable, searchable list of all persisted scenarios. Columns: name, project, industry, hours (p50), range (p10–p90), saved-at. Filters: project dropdown, industry dropdown, free-text search. Bulk-select 2–3 rows to enable the "Compare selected" button. Per-row actions: Duplicate, Delete, Export PDF. The PDF action calls `GET /api/quotes/{id}/pdf` and triggers a browser download.
+Filterable, searchable list of all persisted scenarios. A 4-card KPI strip at the top shows total saved, last-7-days count, average hours, and high-confidence % (scenarios where the 90% CI band is ≤ 25% of the p50 estimate, marked with an amber top stripe).
+
+Table columns: checkbox, name/project, industry, hours (p50), range (p10–p90), confidence (1–5 amber pips; thresholds: ≤10% CI/hours → 5, ≤20% → 4, ≤35% → 3, ≤55% → 2, else 1), saved-at, hover menu.
+
+Filters: project dropdown, industry dropdown, free-text search. Check 2–3 rows to reveal the ink-colored bulk bar; when exactly 2 or 3 rows are selected an amber "Compare →" link appears — otherwise it reads "Pick 2 or 3 to compare". Per-row hover menu: Duplicate, Export PDF, Delete. The PDF action calls `GET /api/quotes/{id}/pdf` and triggers a browser download.
 
 ### Compare (`/quotes/compare?ids=a,b[,c]`)
 
-Side-by-side view for 2–3 saved scenarios:
+Side-by-side view for 2–3 saved scenarios. The first scenario is the anchor (amber left-rail + "Anchor" eyebrow); all deltas are measured against it.
 
-- Headline hours, range, confidence, and Δ vs the first column.
-- Grouped bar chart of per-bucket hours across all scenarios (Recharts).
-- Input-diff table showing only fields that differ between scenarios.
-- Drivers strip (placeholder until drivers are persisted with each saved quote in a follow-up).
+- **Header:** display-hero hours, 90% CI range, and signed Δ vs anchor for each non-anchor column. Positive deltas (more hours) render in amber; negative deltas (fewer hours) render in teal.
+- **Per-bucket chart:** grouped bar chart of operation-bucket hours across all scenarios (Recharts, ink/amber/teal palette, JetBrains Mono axis labels).
+- **Input diff:** grid showing only fields that differ; non-anchor changed cells are colored `text-amber`.
+- **Drivers strip:** 3-col split with amber "Anchor · top drivers" eyebrow (placeholder until per-saved-quote drivers are persisted in a follow-up).
 
 ### Executive Overview (`/insights`)
 

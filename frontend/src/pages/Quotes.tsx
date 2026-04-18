@@ -1,11 +1,19 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Plus, Download } from "lucide-react";
 import { toast } from "sonner";
 
-import { downloadScenarioPdf, useDeleteScenario, useDuplicateScenario, useSavedQuotes } from "@/api/quote";
+import {
+  downloadScenarioPdf,
+  useDeleteScenario,
+  useDuplicateScenario,
+  useSavedQuotes,
+} from "@/api/quote";
 import { PageHeader } from "@/components/PageHeader";
 
+import { QuotesBulkBar } from "./quotes/QuotesBulkBar";
 import { QuotesFilters } from "./quotes/QuotesFilters";
+import { QuotesKpiStrip } from "./quotes/QuotesKpiStrip";
 import { QuotesTable } from "./quotes/QuotesTable";
 
 export function Quotes() {
@@ -40,65 +48,83 @@ export function Quotes() {
     setSelected(next);
   };
 
+  const canCompare = selected.size >= 2 && selected.size <= 3;
   const compareSelected = () => {
-    if (selected.size < 2 || selected.size > 3) return;
+    if (!canCompare) return;
     navigate(`/quotes/compare?ids=${[...selected].join(",")}`);
   };
 
   return (
     <>
       <PageHeader
-        eyebrow="Quotes"
+        eyebrow="Quotes · Library"
         title="Saved Quotes"
-        description="Every saved scenario, filterable and comparable."
+        description="Every saved scenario — filter, compare, or export."
       />
-      <div className="mt-5 flex items-center justify-between gap-4 flex-wrap">
-        <QuotesFilters
-          projects={projects}
-          industries={industries}
-          project={project}
-          industry={industry}
-          search={search}
-          onChange={({ project: p, industry: i, search: s }) => {
-            setProject(p);
-            setIndustry(i);
-            setSearch(s);
-          }}
-        />
+
+      <QuotesKpiStrip rows={rows} />
+
+      <div className="flex items-center gap-3 mb-3">
+        <div className="flex-1 min-w-0">
+          <QuotesFilters
+            projects={projects}
+            industries={industries}
+            project={project}
+            industry={industry}
+            search={search}
+            onChange={({ project: p, industry: i, search: s }) => {
+              setProject(p);
+              setIndustry(i);
+              setSearch(s);
+            }}
+          />
+        </div>
         <button
           type="button"
-          onClick={compareSelected}
-          disabled={selected.size < 2 || selected.size > 3}
-          className="px-3 py-1.5 rounded-md bg-teal text-white text-sm disabled:bg-line disabled:text-muted disabled:cursor-not-allowed"
+          onClick={() => navigate("/")}
+          className="inline-flex items-center gap-2 px-3 py-2 text-xs border hairline rounded-sm bg-surface hover:bg-paper"
         >
-          Compare {selected.size > 0 ? selected.size : ""} selected
+          <Plus size={14} strokeWidth={1.75} /> New quote
+        </button>
+        <button
+          type="button"
+          onClick={() => toast.info("CSV export lands later")}
+          className="inline-flex items-center gap-2 px-3 py-2 text-xs border hairline rounded-sm bg-surface hover:bg-paper"
+        >
+          <Download size={14} strokeWidth={1.75} /> Export CSV
         </button>
       </div>
-      <div className="mt-4">
-        <QuotesTable
-          rows={rows}
-          selected={selected}
-          onToggle={toggle}
-          onRowAction={async (id, action) => {
-            if (action === "duplicate") {
-              const copy = await dup.mutateAsync(id);
-              toast.success(`Duplicated as "${copy.name}"`);
-            } else if (action === "delete") {
-              if (!confirm("Delete this scenario?")) return;
-              await del.mutateAsync(id);
-              toast.success("Deleted");
-            } else if (action === "pdf") {
-              try {
-                await downloadScenarioPdf(id);
-              } catch {
-                toast.error("Could not generate PDF");
-              }
-            } else if (action === "open") {
-              toast.info("Opening saved quotes in the cockpit lands in a follow-up");
+
+      <QuotesBulkBar
+        selectedCount={selected.size}
+        canCompare={canCompare}
+        onCompare={compareSelected}
+        onClear={() => setSelected(new Set())}
+      />
+
+      <QuotesTable
+        rows={rows}
+        selected={selected}
+        onToggle={toggle}
+        onRowAction={async (id, action) => {
+          if (action === "duplicate") {
+            const copy = await dup.mutateAsync(id);
+            toast.success(`Duplicated as "${copy.name}"`);
+          } else if (action === "delete") {
+            if (!confirm("Delete this scenario?")) return;
+            await del.mutateAsync(id);
+            toast.success("Deleted");
+          } else if (action === "pdf") {
+            try {
+              await downloadScenarioPdf(id);
+            } catch {
+              toast.error("Could not generate PDF");
             }
-          }}
-        />
-      </div>
+          } else if (action === "open") {
+            toast.info("Opening saved quotes in the cockpit lands in a follow-up");
+          }
+        }}
+      />
     </>
   );
 }
