@@ -180,6 +180,12 @@ Four KPI cards rendered with display-hero numerics (Barlow Condensed, large weig
 | `/quotes/compare` | `Compare` | Side-by-side scenario comparison |
 | `/performance` | `ModelPerformance` | Estimate accuracy dashboard |
 | `/insights` | `ExecutiveOverview` | Executive KPI overview (activity chart, MAPE heatmap) |
-| `/admin/*` | Admin pages | Upload, train, data explorer (auth-gated); Upload & Train includes "Load demo data" button |
+| `/admin/login` | `AdminLogin` | Auth gate — amber top stripe, teal "Admin · access" eyebrow, ink submit button. Fully functional. |
+| `/admin` | `AdminOverview` | 4 KPI cards (Models ready, Training rows, API uptime 30d, Open flags), training runs table, system alerts list, data sources table. "Models ready" is live; remaining cards and tables are sample data until the admin dataset endpoint ships. |
+| `/admin/train` | `AdminTrain` | Real "Load demo data" mutation card (teal stripe, `Sparkles` icon) wrapped in a visual shell: 4-step progress rail (Upload → Validate → Train → Review), dashed upload placeholder, config panel. |
+| `/admin/data` | `AdminData` | Filter bar + summary stats row + histogram shell (SVG bars, amber middle buckets, ink flanks) + data table placeholder. Sample data from fixtures. |
+| `/admin/drivers` | `AdminDrivers` | Operation picker + global feature importance bar chart + SVG partial-dependence chart + neighbor pool config card. Sample data from fixtures. |
+
+Sample data for admin shells is sourced from `frontend/src/pages/admin/fixtures.ts`, which exports `SAMPLE_RUNS`, `SAMPLE_ALERTS`, `SAMPLE_SOURCES`, `SAMPLE_IMPORTANCE`, and `SAMPLE_HISTOGRAM` arrays typed against `TrainingRun`, `AdminAlert`, `DataSource`, `FeatureImportance`, and histogram bucket interfaces. Each card header labels its content "sample data" so the placeholder state is visually explicit.
 
 Compare-PDF (multi-scenario) is deferred per spec; only single-quote PDFs are supported.
