@@ -1,5 +1,6 @@
 # tests/test_quotes_storage.py
 from __future__ import annotations
+
 from datetime import datetime
 
 import pytest
@@ -8,13 +9,13 @@ import pytest
 @pytest.fixture(autouse=True)
 def _isolated_data_dir(tmp_path, monkeypatch):
     monkeypatch.setenv("DATA_DIR", str(tmp_path))
-    from backend.app import paths, quotes_storage
+    from backend.app import paths
     paths.ensure_runtime_dirs()
     yield
 
 
 def _make_create():
-    from backend.app.schemas_api import SavedQuoteCreate, QuoteInput, QuotePrediction
+    from backend.app.schemas_api import QuoteInput, QuotePrediction, SavedQuoteCreate
     from core.schemas import OpPrediction, SalesBucketPrediction
     return SavedQuoteCreate(
         name="Draft A",
@@ -31,9 +32,19 @@ def _make_create():
             stations_count=8,
         ),
         prediction=QuotePrediction(
-            ops={"mechanical_hours": OpPrediction(p50=100, p10=80, p90=120, std=10, rel_width=0.4, confidence="medium")},
+            ops={
+                "mechanical_hours": OpPrediction(
+                    p50=100, p10=80, p90=120,
+                    std=10, rel_width=0.4, confidence="medium",
+                ),
+            },
             total_p50=100.0, total_p10=80.0, total_p90=120.0,
-            sales_buckets={"mechanical": SalesBucketPrediction(p50=100, p10=80, p90=120, rel_width=0.4, confidence="medium")},
+            sales_buckets={
+                "mechanical": SalesBucketPrediction(
+                    p50=100, p10=80, p90=120,
+                    rel_width=0.4, confidence="medium",
+                ),
+            },
         ),
     )
 

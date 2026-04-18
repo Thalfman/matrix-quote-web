@@ -1,7 +1,7 @@
 # tests/test_insights.py
 from __future__ import annotations
+
 import pandas as pd
-import pytest
 
 
 def test_weekly_quotes_empty_returns_zero_weeks():
@@ -36,8 +36,10 @@ def test_accuracy_heatmap_handles_missing_history():
 def test_overview_endpoint_degrades_when_nothing_exists(tmp_path, monkeypatch):
     monkeypatch.setenv("DATA_DIR", str(tmp_path))
     from importlib import reload
+
     from backend.app import main, paths
-    reload(paths); reload(main)
+    reload(paths)
+    reload(main)
     from fastapi.testclient import TestClient
     client = TestClient(main.app)
     r = client.get("/api/insights/overview")

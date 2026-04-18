@@ -20,8 +20,10 @@ from fastapi.testclient import TestClient  # noqa: E402
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("DATA_DIR", str(tmp_path))
     from importlib import reload
+
     from backend.app import main, paths
-    reload(paths); reload(main)
+    reload(paths)
+    reload(main)
     return TestClient(main.app)
 
 
@@ -41,12 +43,26 @@ def _create_body():
             "stations_count": 8,
         },
         "prediction": {
-            "ops": {"mechanical_hours": {"p50":100,"p10":80,"p90":120,"std":10,"rel_width":0.4,"confidence":"medium"}},
+            "ops": {
+                "mechanical_hours": {
+                    "p50": 100, "p10": 80, "p90": 120,
+                    "std": 10, "rel_width": 0.4, "confidence": "medium",
+                },
+            },
             "total_p50": 1200, "total_p10": 1000, "total_p90": 1400,
             "sales_buckets": {
-                "mechanical":  {"p50":500,"p10":450,"p90":560,"rel_width":0.2,"confidence":"medium"},
-                "electrical":  {"p50":420,"p10":380,"p90":470,"rel_width":0.2,"confidence":"medium"},
-                "controls":    {"p50":280,"p10":240,"p90":320,"rel_width":0.3,"confidence":"low"},
+                "mechanical": {
+                    "p50": 500, "p10": 450, "p90": 560,
+                    "rel_width": 0.2, "confidence": "medium",
+                },
+                "electrical": {
+                    "p50": 420, "p10": 380, "p90": 470,
+                    "rel_width": 0.2, "confidence": "medium",
+                },
+                "controls": {
+                    "p50": 280, "p10": 240, "p90": 320,
+                    "rel_width": 0.3, "confidence": "low",
+                },
             },
         },
     }

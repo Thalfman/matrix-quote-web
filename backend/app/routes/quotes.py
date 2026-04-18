@@ -13,7 +13,6 @@ from ..schemas_api import (
     SavedQuoteList,
 )
 
-
 router = APIRouter(prefix="/api/quotes", tags=["quotes"])
 
 
@@ -66,7 +65,11 @@ def delete_quote(quote_id: str) -> Response:
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.post("/{quote_id}/duplicate", response_model=SavedQuote, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{quote_id}/duplicate",
+    response_model=SavedQuote,
+    status_code=status.HTTP_201_CREATED,
+)
 def duplicate_quote(quote_id: str) -> SavedQuote:
     q = quotes_storage.duplicate(quote_id)
     if q is None:

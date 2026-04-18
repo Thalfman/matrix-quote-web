@@ -1,5 +1,6 @@
 # tests/test_quotes_routes.py
 from __future__ import annotations
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -8,8 +9,10 @@ from fastapi.testclient import TestClient
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("DATA_DIR", str(tmp_path))
     from importlib import reload
+
     from backend.app import main, paths
-    reload(paths); reload(main)
+    reload(paths)
+    reload(main)
     return TestClient(main.app)
 
 
@@ -30,9 +33,19 @@ def _create_body():
             "stations_count": 8,
         },
         "prediction": {
-            "ops": {"mechanical_hours": {"p50":100,"p10":80,"p90":120,"std":10,"rel_width":0.4,"confidence":"medium"}},
+            "ops": {
+                "mechanical_hours": {
+                    "p50": 100, "p10": 80, "p90": 120,
+                    "std": 10, "rel_width": 0.4, "confidence": "medium",
+                },
+            },
             "total_p50": 100, "total_p10": 80, "total_p90": 120,
-            "sales_buckets": {"mechanical": {"p50":100,"p10":80,"p90":120,"rel_width":0.4,"confidence":"medium"}},
+            "sales_buckets": {
+                "mechanical": {
+                    "p50": 100, "p10": 80, "p90": 120,
+                    "rel_width": 0.4, "confidence": "medium",
+                },
+            },
         },
     }
 

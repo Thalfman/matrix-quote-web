@@ -10,8 +10,7 @@ from __future__ import annotations
 import json
 import os
 import uuid
-from datetime import datetime, timezone
-from pathlib import Path
+from datetime import UTC, datetime
 from typing import Any
 
 import pandas as pd
@@ -25,7 +24,6 @@ from .schemas_api import (
     SavedQuoteList,
     SavedQuoteSummary,
 )
-
 
 COLUMNS = [
     "id", "name", "project_name", "client_name", "notes",
@@ -72,7 +70,7 @@ def _row_from(create: SavedQuoteCreate, id_: str, created_at: datetime) -> dict[
 def create(payload: SavedQuoteCreate) -> SavedQuote:
     df = _load()
     id_ = uuid.uuid4().hex
-    created_at = datetime.now(timezone.utc)
+    created_at = datetime.now(UTC)
     row = _row_from(payload, id_, created_at)
     df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
     _atomic_write(df)

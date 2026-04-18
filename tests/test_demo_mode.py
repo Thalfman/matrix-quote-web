@@ -45,7 +45,7 @@ def _reload_stack(monkeypatch, tmp_path, *, enable_demo: bool = False):
     # Clear settings cache so create_app() sees the new DATA_DIR.
     get_settings.cache_clear()
 
-    from backend.app import paths, storage, demo, main
+    from backend.app import demo, main, paths, storage
 
     importlib.reload(paths)
     importlib.reload(storage)
@@ -95,6 +95,7 @@ def test_no_seed_without_env(tmp_path, monkeypatch):
 def test_load_demo_refuses_when_real_data_present(tmp_path, monkeypatch):
     """seed_on_demand() must refuse (False, reason) if master parquet already exists."""
     import pandas as pd
+
     from backend.app.deps import get_settings
 
     monkeypatch.setenv("DATA_DIR", str(tmp_path))
