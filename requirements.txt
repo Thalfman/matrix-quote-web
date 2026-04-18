@@ -2,7 +2,7 @@
 # Core ML library (vendored from matrix_quote_app) depends on:
 pandas
 numpy
-scikit-learn
+scikit-learn>=1.5,<1.6
 pydantic>=2.5
 joblib
 openpyxl
