@@ -15,7 +15,7 @@
     </header>
 
     <div class="cover-meta">
-      <div class="meta-label">PROJECT</div>
+      <div class="meta-label">Project</div>
       <div class="meta-value">{{ quote.project_name }}</div>
 
       {% if quote.client_name %}
@@ -32,11 +32,11 @@
     <hr class="divider"/>
 
     <div class="hero">
-      <div class="hero-label">ESTIMATED HOURS</div>
+      <div class="hero-label">Estimated hours</div>
       <div class="hero-number">{{ format_hours(quote.prediction.total_p50) }}</div>
       <div class="hero-range">
-        Range {{ format_hours(quote.prediction.total_p10) }} – {{ format_hours(quote.prediction.total_p90) }}
-        &middot; 90% confidence
+        Range {{ format_hours(quote.prediction.total_p10) }}–{{ format_hours(quote.prediction.total_p90) }}
+        &middot; 90% CI
       </div>
     </div>
   </section>
@@ -46,7 +46,12 @@
     <h2>Per-bucket breakdown</h2>
     <table class="breakdown">
       <thead>
-        <tr><th>Bucket</th><th class="num">Hours</th><th class="num">Range</th><th class="bar">Share</th></tr>
+        <tr>
+          <th>Bucket</th>
+          <th class="num">Hours</th>
+          <th class="num">Range (90% CI)</th>
+          <th class="bar">Share</th>
+        </tr>
       </thead>
       <tbody>
         {% set total = quote.prediction.total_p50 or 1 %}
