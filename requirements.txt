@@ -25,5 +25,5 @@ jinja2>=3.1
 Pillow>=10,<12
 fonttools>=4.43,<4.55
 # pydyf 0.12 dropped Stream.transform; weasyprint 62.3's Stream.transform overrides it
-pydyf>=0.10,<0.12
+pydyf>=0.10,<0.13
 
