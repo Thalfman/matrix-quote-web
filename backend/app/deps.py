@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hmac
+import os
 from datetime import UTC, datetime, timedelta
 from functools import lru_cache
 from typing import Annotated
@@ -31,9 +32,32 @@ class Settings(BaseSettings):
         return [o.strip() for o in self.cors_allow_origins.split(",") if o.strip()]
 
 
+def _in_test_env() -> bool:
+    return bool(os.environ.get("PYTEST_CURRENT_TEST"))
+
+
+def _assert_production_secrets(s: Settings) -> None:
+    if _in_test_env():
+        return
+    if not s.admin_password:
+        raise RuntimeError(
+            "ADMIN_PASSWORD must be set (non-empty) outside the test env."
+        )
+    if not s.admin_jwt_secret:
+        raise RuntimeError(
+            "ADMIN_JWT_SECRET must be set (non-empty) outside the test env."
+        )
+    if len(s.admin_jwt_secret) < 32:
+        raise RuntimeError(
+            "ADMIN_JWT_SECRET must be at least 32 characters."
+        )
+
+
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()
+    s = Settings()
+    _assert_production_secrets(s)
+    return s
 
 
 JWT_ALGORITHM = "HS256"
