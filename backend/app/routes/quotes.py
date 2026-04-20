@@ -1,7 +1,6 @@
 # backend/app/routes/quotes.py
 from __future__ import annotations
 
-import re
 from datetime import datetime
 from typing import Annotated
 
@@ -10,6 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from .. import quotes_storage
 from ..deps import require_admin
 from ..pdf import render_quote_pdf
+from ..quote_ids import safe_filename_part
 from ..schemas_api import (
     SavedQuote,
     SavedQuoteCreate,
@@ -18,12 +18,6 @@ from ..schemas_api import (
 )
 
 router = APIRouter(prefix="/api/quotes", tags=["quotes"])
-
-_FILENAME_SAFE = re.compile(r"[^A-Za-z0-9_.-]+")
-
-
-def _safe_filename_part(value: str, max_len: int = 60) -> str:
-    return _FILENAME_SAFE.sub("-", value).strip("-")[:max_len] or "quote"
 
 
 @router.get("", response_model=SavedQuoteList)
@@ -60,10 +54,7 @@ def get_quote_pdf(
     if q is None:
         raise HTTPException(status_code=404, detail="Quote not found")
     pdf_bytes = render_quote_pdf(q, quote_number=_quote_number(q.created_at))
-    fname = (
-        f"Matrix-Quote-{_safe_filename_part(q.project_name)}-"
-        f"{q.created_at:%Y%m%d}.pdf"
-    )
+    fname = f"Matrix-Quote-{safe_filename_part(q.project_name)}-{q.created_at:%Y%m%d}.pdf"
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",

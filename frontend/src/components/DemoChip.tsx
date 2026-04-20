@@ -1,15 +1,19 @@
 import { Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "react-router-dom";
 import { api } from "@/api/client";
 
 type DemoStatus = { is_demo: boolean; enabled_env: boolean; has_real_data: boolean };
 
 export function DemoChip() {
+  const { pathname } = useLocation();
   const { data } = useQuery<DemoStatus>({
     queryKey: ["demoStatus"],
     queryFn: async () => (await api.get<DemoStatus>("/demo/status")).data,
     refetchInterval: 60_000,
+    enabled: !pathname.startsWith("/admin/login"),
   });
+  if (pathname.startsWith("/admin/login")) return null;
   if (!data?.is_demo) return null;
   return (
     <div

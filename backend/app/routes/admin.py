@@ -9,13 +9,14 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from .. import demo
 from ..deps import (
     Settings,
     create_admin_token,
     get_settings,
+    limiter,
     require_admin,
     verify_admin_password,
 )
@@ -38,7 +39,9 @@ router = APIRouter(prefix="/api/admin", tags=["admin"])
 
 
 @router.post("/login", response_model=LoginResponse)
+@limiter.limit("5/minute")
 def login(
+    request: Request,
     body: LoginRequest,
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> LoginResponse:
@@ -66,7 +69,8 @@ def train_preview(_: dict = Depends(require_admin)) -> TrainPreviewResponse:
 
 
 @router.post("/train", response_model=TrainResponse)
-def train(_: dict = Depends(require_admin)) -> TrainResponse:
+@limiter.limit("3/hour")
+def train(request: Request, _: dict = Depends(require_admin)) -> TrainResponse:
     raise _not_implemented()
 
 

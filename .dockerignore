@@ -25,3 +25,19 @@ frontend/.vite
 Thumbs.db
 *.log
 tests
+
+# Demo and scratch directories
+.demo/
+.tmp_noseed/
+demo_assets/
+
+# Local docs + planning files (CLAUDE.md already listed above)
+docs/
+scripts/
+*.md
+
+# Coverage reports (if ever generated locally)
+coverage/
+htmlcov/
+.coverage
+.coverage.*

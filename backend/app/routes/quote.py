@@ -13,6 +13,7 @@ from service.predict_lib import predict_quote, predict_quotes_df
 
 from .. import storage
 from ..pdf import render_quote_pdf
+from ..quote_ids import safe_filename_part
 from ..schemas_api import AdHocPdfRequest, ExplainedQuoteResponse, QuoteInput, SavedQuote
 
 router = APIRouter(prefix="/api/quote", tags=["quote"])
@@ -36,6 +37,7 @@ def single_quote(payload: QuoteInput) -> ExplainedQuoteResponse:
 
     # Best-effort explainability. Never fail the quote because of it.
     from ..explain import compute_drivers, compute_neighbors
+
     try:
         drivers = compute_drivers(payload, top_n=3)
     except Exception:
@@ -76,7 +78,10 @@ def batch_preview(file: UploadFile = File(...)) -> dict:  # noqa: B008
     if len(raw) > MAX_UPLOAD_BYTES:
         raise HTTPException(status_code=413, detail="File too large (max 10 MB).")
     buf = io.BytesIO(raw)
-    xls = pd.ExcelFile(buf)
+    try:
+        xls = pd.ExcelFile(buf)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Could not parse file: {exc}") from exc
     columns_per_sheet: dict[str, list[str]] = {}
     for s in xls.sheet_names:
         df = pd.read_excel(xls, sheet_name=s, nrows=0)
@@ -123,7 +128,7 @@ def adhoc_pdf(payload: AdHocPdfRequest) -> Response:
         **payload.model_dump(),
     )
     pdf_bytes = render_quote_pdf(transient, quote_number=f"{now:%Y%m%d}-{now:%H%M}")
-    fname = f"Matrix-Quote-{payload.project_name.replace(' ', '-')}-{now:%Y%m%d}.pdf"
+    fname = f"Matrix-Quote-{safe_filename_part(payload.project_name)}-{now:%Y%m%d}.pdf"
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",

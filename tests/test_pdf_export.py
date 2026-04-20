@@ -52,3 +52,22 @@ def test_saved_quote_pdf_404_when_missing(admin_client):
 def test_saved_quote_pdf_requires_auth(client):
     r = client.get("/api/quotes/any-id/pdf")
     assert r.status_code == 401
+
+
+def test_adhoc_pdf_filename_is_header_safe(client, saved_quote_payload):
+    # Inject quote + CRLF + semicolon + colon into project_name to attempt header injection.
+    payload = {
+        "name": "Draft",
+        "project_name": 'Bad"Name;\r\nX-Injected: 1',
+        "created_by": "Tester",
+        "inputs": saved_quote_payload["inputs"],
+        "prediction": saved_quote_payload["prediction"],
+    }
+    resp = client.post("/api/quote/pdf", json=payload)
+    assert resp.status_code == 200
+    cd = resp.headers["content-disposition"]
+    assert cd.startswith('attachment; filename="') and cd.endswith('"')
+    filename_value = cd[len('attachment; filename="'):-1]
+    # No char that could escape the quoted-string context or inject a new header.
+    for bad in ('"', ";", ":", "\r", "\n"):
+        assert bad not in filename_value

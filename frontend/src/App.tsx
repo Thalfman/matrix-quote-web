@@ -18,12 +18,12 @@ export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={<SingleQuote />} />
-        <Route path="batch" element={<BatchQuotes />} />
-        <Route path="performance" element={<ModelPerformance />} />
-        <Route path="insights" element={<ExecutiveOverview />} />
-        <Route path="quotes" element={<Quotes />} />
-        <Route path="quotes/compare" element={<Compare />} />
+        <Route index element={<RequireAdmin><SingleQuote /></RequireAdmin>} />
+        <Route path="batch" element={<RequireAdmin><BatchQuotes /></RequireAdmin>} />
+        <Route path="performance" element={<RequireAdmin><ModelPerformance /></RequireAdmin>} />
+        <Route path="insights" element={<RequireAdmin><ExecutiveOverview /></RequireAdmin>} />
+        <Route path="quotes" element={<RequireAdmin><Quotes /></RequireAdmin>} />
+        <Route path="quotes/compare" element={<RequireAdmin><Compare /></RequireAdmin>} />
 
         <Route path="admin/login" element={<AdminLogin />} />
         <Route

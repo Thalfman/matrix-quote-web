@@ -22,6 +22,14 @@ def _clean_settings_cache(monkeypatch, tmp_path):
     get_settings.cache_clear()
 
 
+@pytest.fixture(autouse=True)
+def _reset_limiter():
+    from backend.app.deps import limiter
+    limiter.reset()
+    yield
+    limiter.reset()
+
+
 @pytest.fixture
 def client() -> TestClient:
     from backend.app.main import create_app

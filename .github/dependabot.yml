@@ -15,6 +15,18 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: "chore(deps)"
+    # Load-bearing pin cascade — weasyprint 62.3 breaks against Pillow >=12 /
+    # fonttools >=4.55 / pydyf 0.12, and sklearn/pandas/scipy/jinja2 are pinned
+    # to versions fixture tests rely on. Don't auto-bump; coordinate manually.
+    ignore:
+      - dependency-name: "weasyprint"
+      - dependency-name: "pydyf"
+      - dependency-name: "Pillow"
+      - dependency-name: "fonttools"
+      - dependency-name: "pandas"
+      - dependency-name: "scipy"
+      - dependency-name: "scikit-learn"
+      - dependency-name: "jinja2"
 
   - package-ecosystem: "npm"
     directory: "/frontend"
@@ -23,6 +35,21 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: "chore(deps)"
+    # Major version bumps on the build/test toolchain need hand-review
+    # (vite/vitest config, React types shifts, eslint plugin API changes).
+    ignore:
+      - dependency-name: "vite"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "vitest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "jsdom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@hookform/resolvers"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint-plugin-react-hooks"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint-plugin-react-refresh"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "docker"
     directory: "/"
@@ -31,3 +58,11 @@ updates:
     open-pull-requests-limit: 3
     commit-message:
       prefix: "chore(deps)"
+    # Major version bumps for runtime bases break compatibility (Python 3.14
+    # drops deprecated APIs; Node 25 ships new V8). Digest-only bumps still
+    # flow through for security patches within the same major.
+    ignore:
+      - dependency-name: "python"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]

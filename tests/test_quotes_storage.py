@@ -80,3 +80,21 @@ def test_atomic_replace_leaves_no_tmp_files(tmp_path):
     quotes_storage.create(_make_create())
     parents = list(tmp_path.rglob("quotes.parquet.tmp"))
     assert parents == []
+
+
+def test_get_round_trips_null_nullable_fields():
+    """
+    Regression: client_name=None and notes=None must round-trip through
+    parquet without becoming NaN in the pydantic return value.
+    """
+    from backend.app import quotes_storage
+
+    payload = _make_create()
+    # _make_create already builds with client_name=None; double-check here:
+    assert payload.client_name is None
+
+    created = quotes_storage.create(payload)
+    fetched = quotes_storage.get(created.id)
+    assert fetched is not None
+    assert fetched.client_name is None
+    assert fetched.notes is None

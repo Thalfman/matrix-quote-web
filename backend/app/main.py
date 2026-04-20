@@ -13,9 +13,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 from . import demo
-from .deps import get_settings
+from .deps import get_settings, limiter
 from .paths import ensure_runtime_dirs
 from .routes import admin, insights, metrics, quote, quotes
 
@@ -31,6 +34,9 @@ def create_app() -> FastAPI:
         description="Wraps the Matrix per-operation quoting engine for customer-facing estimation.",
     )
 
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    app.add_middleware(SlowAPIMiddleware)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins_list,
