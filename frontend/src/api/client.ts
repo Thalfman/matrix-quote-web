@@ -32,6 +32,10 @@ api.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response?.status === 401) {
       clearAdminToken();
+      // Don't loop on the login endpoint itself
+      if (!window.location.pathname.startsWith("/admin/login")) {
+        window.location.assign("/admin/login");
+      }
     }
     return Promise.reject(error);
   },
