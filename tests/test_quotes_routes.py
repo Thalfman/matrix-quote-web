@@ -75,3 +75,8 @@ def test_duplicate(admin_client, saved_quote_payload):
     r = admin_client.post(f"/api/quotes/{id_}/duplicate")
     assert r.status_code == 201
     assert r.json()["name"].endswith("(copy)")
+
+
+def test_list_quotes_rejects_oversized_limit(admin_client):
+    resp = admin_client.get("/api/quotes?limit=1000000")
+    assert resp.status_code == 422

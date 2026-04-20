@@ -10,10 +10,12 @@ from __future__ import annotations
 import json
 import os
 import uuid
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from typing import Any
 
 import pandas as pd
+from filelock import FileLock, Timeout
 
 from .paths import ensure_runtime_dirs, quotes_parquet_path
 from .schemas_api import (
@@ -75,13 +77,30 @@ def _row_from(create: SavedQuoteCreate, id_: str, created_at: datetime) -> dict[
     }
 
 
+@contextmanager
+def _quotes_write_lock():
+    path = quotes_parquet_path()
+    lock_path = path.with_suffix(path.suffix + ".lock")
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with FileLock(str(lock_path), timeout=5.0):
+            yield
+    except Timeout as exc:
+        from fastapi import HTTPException
+        raise HTTPException(
+            status_code=503,
+            detail="Quotes store is busy, try again.",
+        ) from exc
+
+
 def create(payload: SavedQuoteCreate) -> SavedQuote:
-    df = _load()
-    id_ = uuid.uuid4().hex
-    created_at = datetime.now(UTC)
-    row = _row_from(payload, id_, created_at)
-    df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
-    _atomic_write(df)
+    with _quotes_write_lock():
+        df = _load()
+        id_ = uuid.uuid4().hex
+        created_at = datetime.now(UTC)
+        row = _row_from(payload, id_, created_at)
+        df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
+        _atomic_write(df)
     return SavedQuote(id=id_, created_at=created_at, **payload.model_dump())
 
 
@@ -144,12 +163,13 @@ def get(id_: str) -> SavedQuote | None:
 
 
 def delete(id_: str) -> bool:
-    df = _load()
-    before = len(df)
-    df = df[df["id"] != id_]
-    if len(df) == before:
-        return False
-    _atomic_write(df)
+    with _quotes_write_lock():
+        df = _load()
+        before = len(df)
+        df = df[df["id"] != id_]
+        if len(df) == before:
+            return False
+        _atomic_write(df)
     return True
 
 

@@ -17,6 +17,8 @@ matrix-quote-web/
 ├── backend/         # FastAPI wrapper
 │   └── app/
 │       ├── explain.py          # per-quote driver contributions + neighbor search
+│       ├── logging_config.py   # root logger setup (dictConfig-style, stderr, ISO timestamps)
+│       ├── middleware.py       # SecurityHeadersMiddleware (CSP, HSTS, X-Frame-Options, …)
 │       ├── pdf.py              # render_quote_pdf() — WeasyPrint/Jinja PDF renderer
 │       ├── quotes_storage.py   # saved-quote CRUD, atomic-replace parquet persistence
 │       ├── templates/          # Jinja2 PDF template + print CSS + SVG wordmark
@@ -29,12 +31,12 @@ matrix-quote-web/
 ├── frontend/        # Vite SPA (Barlow Condensed + JetBrains Mono + Inter; ink/paper/teal/amber design system; light/dark overlay)
 ├── demo_assets/     # committed synthetic dataset + pretrained models for demo mode
 │   ├── data/master/projects_master.parquet  # 300-row synthetic master
-│   └── models/     # 12 *.joblib bundles, metrics_summary.csv, metrics_history.parquet, calibration.parquet
+│   └── models/     # 12 *.joblib bundles (stored via Git LFS), metrics_summary.csv, metrics_history.parquet, calibration.parquet
 ├── scripts/         # one-off utilities
 │   ├── build_test_fixtures.py   # generate synthetic fixture models (run once)
 │   └── generate_demo_assets.py  # rebuild demo_assets/ after schema or pipeline changes
 ├── tests/           # pytest
-│   └── fixtures/tiny_models/   # checked-in synthetic models for unit tests
+│   └── fixtures/tiny_models/   # synthetic models for unit tests (stored via Git LFS)
 ├── data/master/     # runtime: master parquet + saved quotes parquet (gitignored)
 │   └── quotes.parquet          # persisted saved scenarios (atomic-replace writes)
 ├── models/          # runtime: trained joblib bundles + metrics_summary.csv (gitignored)
@@ -56,6 +58,28 @@ uvicorn backend.app.main:app --reload --port 8000
 ```
 
 API docs at `http://localhost:8000/docs`.
+
+#### CORS
+
+`CORS_ALLOW_ORIGINS` accepts a comma-separated list of origins. Setting it to `*` is rejected at startup — the middleware uses `allow_credentials=True`, which is incompatible with a wildcard origin. See `.env.example` for the correct local dev value.
+
+Allowed methods: `GET POST PUT DELETE OPTIONS`. Allowed headers: `Authorization Content-Type X-Requested-With`.
+
+#### Security headers
+
+`SecurityHeadersMiddleware` (`backend/app/middleware.py`) adds the following headers to every response:
+
+| Header | Value |
+|--------|-------|
+| `Content-Security-Policy` | `default-src 'self'`; inline styles allowed; Google Fonts allowed |
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` |
+| `X-Frame-Options` | `DENY` |
+| `X-Content-Type-Options` | `nosniff` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+
+#### File uploads
+
+The batch upload endpoint (`POST /api/quote/batch`) and the training upload (`POST /api/admin/train`) accept `.xlsx`, `.xlsm`, and `.csv` files only. Files exceeding 10 MB receive a `413` response. The body is streamed in 64 KB chunks so the server never buffers the full file in memory before the size check fires.
 
 `POST /api/quote/single` returns `ExplainedQuoteResponse`: the prediction is
 nested under `body.prediction` (not top-level), and `body.drivers` /
@@ -153,8 +177,8 @@ Rebuild demo assets with:
 ## Running tests
 
 Backend tests depend on a checked-in fixture bundle of tiny synthetic models in
-`tests/fixtures/tiny_models/`. The bundle is already committed; you only need to
-regenerate it if the training pipeline changes:
+`tests/fixtures/tiny_models/` (stored in Git LFS). The bundle is already committed;
+you only need to regenerate it if the training pipeline changes:
 
 ```bash
 python scripts/build_test_fixtures.py   # re-generates parquet + joblib files
@@ -174,6 +198,10 @@ cd frontend && npm test
 2. Attach a Volume to the service at `/data` (1 GB is plenty for this app).
 3. Set env vars: `ADMIN_PASSWORD`, `ADMIN_JWT_SECRET`, `DATA_DIR=/data`.
 4. Deploy — the Dockerfile builds the frontend and serves it alongside the API.
+
+**Git LFS:** `demo_assets/models/*.joblib` and `tests/fixtures/tiny_models/*.joblib` are stored in Git LFS. Run `git lfs install && git lfs pull` after cloning if the joblib files appear as pointer stubs. Existing joblib files already tracked before this change are not in LFS yet — a future `git lfs migrate import` will clean that up.
+
+The container runs under `tini` as PID 1 (handles zombie reaping and signal forwarding). A Docker `HEALTHCHECK` polls `GET /api/health` every 30 s (3 s timeout, 10 s start-period); Railway considers the container healthy once the probe passes.
 
 The production image installs `libpango-1.0-0 libpangoft2-1.0-0 libcairo2 libharfbuzz0b fonts-liberation` at build time so WeasyPrint can render PDFs. These libraries are absent on Windows dev boxes; `pdf.py` uses a lazy `from weasyprint import HTML` inside the render function so the module imports cleanly locally — the `OSError` only surfaces at render time (i.e. only if you actually call the PDF endpoint without the native libs installed).
 

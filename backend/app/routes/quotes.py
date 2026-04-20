@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
 from .. import quotes_storage
 from ..deps import require_admin
@@ -26,8 +26,8 @@ def list_quotes(
     project: str | None = None,
     industry: str | None = None,
     search: str | None = None,
-    limit: int = 200,
-    offset: int = 0,
+    limit: int = Query(50, ge=1, le=500),
+    offset: int = Query(0, ge=0),
 ) -> SavedQuoteList:
     return quotes_storage.list_all(project, industry, search, limit, offset)
 

@@ -1,6 +1,14 @@
 from fastapi.testclient import TestClient
 
 
+def test_security_headers_present(client):
+    resp = client.get("/api/health")
+    assert resp.headers["x-content-type-options"] == "nosniff"
+    assert resp.headers["x-frame-options"] == "DENY"
+    assert resp.headers["referrer-policy"] == "strict-origin-when-cross-origin"
+    assert "default-src 'self'" in resp.headers["content-security-policy"]
+
+
 def test_health_returns_ok_with_untrained_state(client: TestClient) -> None:
     resp = client.get("/api/health")
     assert resp.status_code == 200

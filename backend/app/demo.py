@@ -34,15 +34,20 @@ def read_status() -> dict:
     if not path.exists():
         return {"is_demo": False}
     try:
-        return json.loads(path.read_text())
+        return json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
         return {"is_demo": False}
 
 
-def _write_status(is_demo: bool) -> None:
+def write_status(payload: dict) -> None:
+    """Write a status dict to the status JSON file (UTF-8)."""
     path = status_json_path()
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps({"is_demo": is_demo}))
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+
+def _write_status(is_demo: bool) -> None:
+    write_status({"is_demo": is_demo})
 
 
 def _copy_tree(src: Path, dst: Path) -> None:

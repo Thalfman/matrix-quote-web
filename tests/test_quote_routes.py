@@ -38,3 +38,20 @@ def test_batch_preview_rejects_non_xlsx_with_400(client):
     )
     assert resp.status_code == 400
     assert "Could not parse" in resp.json()["detail"]
+
+
+def test_batch_rejects_non_xlsx_extension(client):
+    resp = client.post(
+        "/api/quote/batch",
+        files={"file": ("data.exe", b"MZ\x90\x00", "application/octet-stream")},
+    )
+    assert resp.status_code == 400
+    assert "extension" in resp.json()["detail"].lower()
+
+
+def test_batch_preview_rejects_non_xlsx_extension(client):
+    resp = client.post(
+        "/api/quote/batch/preview",
+        files={"file": ("data.txt", b"hello", "text/plain")},
+    )
+    assert resp.status_code == 400
