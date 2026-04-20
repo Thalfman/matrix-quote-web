@@ -1,3 +1,4 @@
+"""Security-header middleware applied to every response."""
 from __future__ import annotations
 
 from starlette.middleware.base import BaseHTTPMiddleware

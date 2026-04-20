@@ -1,3 +1,4 @@
+"""Root logger configuration — call configure_logging() once at startup."""
 from __future__ import annotations
 
 import logging
