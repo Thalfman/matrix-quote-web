@@ -12,9 +12,10 @@ are absent (training pipeline does not yet write them):
 from __future__ import annotations
 
 import pandas as pd
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from .. import demo, storage
+from ..deps import require_admin
 from ..paths import calibration_path, metrics_history_path
 from ..schemas_api import (
     CalibrationPoint,
@@ -27,7 +28,7 @@ from ..schemas_api import (
     TrainingRunRow,
 )
 
-router = APIRouter(prefix="/api", tags=["public"])
+router = APIRouter(prefix="/api", tags=["metrics"])
 
 
 DEFAULT_DROPDOWNS: dict[str, list[str]] = {
@@ -52,7 +53,7 @@ def health() -> HealthResponse:
 
 
 @router.get("/metrics", response_model=MetricsSummary)
-def metrics() -> MetricsSummary:
+def metrics(_admin: dict = Depends(require_admin)) -> MetricsSummary:
     df = storage.read_metrics()
     if df is None or df.empty:
         return MetricsSummary(models_ready=False, metrics=[])
@@ -61,7 +62,7 @@ def metrics() -> MetricsSummary:
 
 
 @router.get("/catalog/dropdowns", response_model=DropdownOptions)
-def dropdowns() -> DropdownOptions:
+def dropdowns(_admin: dict = Depends(require_admin)) -> DropdownOptions:
     df = storage.read_master()
     result: dict[str, list[str]] = {}
     for field, fallback in DEFAULT_DROPDOWNS.items():
@@ -74,7 +75,7 @@ def dropdowns() -> DropdownOptions:
 
 
 @router.get("/metrics/history", response_model=list[TrainingRunRow])
-def metrics_history() -> list[TrainingRunRow]:
+def metrics_history(_admin: dict = Depends(require_admin)) -> list[TrainingRunRow]:
     path = metrics_history_path()
     if not path.exists():
         return []
@@ -91,7 +92,7 @@ def metrics_history() -> list[TrainingRunRow]:
 
 
 @router.get("/metrics/calibration", response_model=list[CalibrationPoint])
-def metrics_calibration() -> list[CalibrationPoint]:
+def metrics_calibration(_admin: dict = Depends(require_admin)) -> list[CalibrationPoint]:
     path = calibration_path()
     if not path.exists():
         return []
@@ -111,7 +112,7 @@ def metrics_calibration() -> list[CalibrationPoint]:
 
 
 @router.get("/metrics/headline", response_model=PerformanceHeadline)
-def metrics_headline() -> PerformanceHeadline:
+def metrics_headline(_admin: dict = Depends(require_admin)) -> PerformanceHeadline:
     head = PerformanceHeadline()
     cur = storage.read_metrics()
     if (
@@ -141,7 +142,7 @@ def metrics_headline() -> PerformanceHeadline:
 
 
 @router.get("/demo/status", response_model=DemoStatus)
-def demo_status() -> DemoStatus:
+def demo_status(_admin: dict = Depends(require_admin)) -> DemoStatus:
     status = demo.read_status()
     return DemoStatus(
         is_demo=bool(status.get("is_demo", False)),

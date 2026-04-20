@@ -70,24 +70,26 @@ def _admin_token(client: TestClient) -> str:
 def test_startup_seeds_when_enabled(tmp_path, monkeypatch):
     """With ENABLE_DEMO=1 and an empty DATA_DIR, startup should seed demo data."""
     client = _reload_stack(monkeypatch, tmp_path, enable_demo=True)
+    token = _admin_token(client)
 
     r = client.get("/api/health")
     assert r.status_code == 200
     assert r.json()["models_ready"] is True, "Models should be ready after demo seed"
 
-    s = client.get("/api/demo/status").json()
+    s = client.get("/api/demo/status", headers={"Authorization": f"Bearer {token}"}).json()
     assert s["is_demo"] is True, "status.json should mark is_demo=true after seed"
 
 
 def test_no_seed_without_env(tmp_path, monkeypatch):
     """Without ENABLE_DEMO, startup must not seed and models must be absent."""
     client = _reload_stack(monkeypatch, tmp_path, enable_demo=False)
+    token = _admin_token(client)
 
     r = client.get("/api/health")
     assert r.status_code == 200
     assert r.json()["models_ready"] is False, "Models should be absent with no seed"
 
-    s = client.get("/api/demo/status").json()
+    s = client.get("/api/demo/status", headers={"Authorization": f"Bearer {token}"}).json()
     assert s["is_demo"] is False
     assert s["enabled_env"] is False
 
@@ -143,5 +145,5 @@ def test_admin_load_succeeds_when_empty(tmp_path, monkeypatch):
     assert body["reason"] is None
 
     # Verify status now reflects demo mode.
-    s = client.get("/api/demo/status").json()
+    s = client.get("/api/demo/status", headers={"Authorization": f"Bearer {token}"}).json()
     assert s["is_demo"] is True, "Demo status should be true after admin load"

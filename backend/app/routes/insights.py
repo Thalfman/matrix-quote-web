@@ -10,9 +10,10 @@ calibration.parquet.
 from __future__ import annotations
 
 import pandas as pd
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from .. import insights, quotes_storage, storage
+from ..deps import require_admin
 from ..paths import calibration_path, metrics_history_path
 from ..schemas_api import InsightsOverview
 
@@ -23,7 +24,7 @@ MODELS_TARGET = 12
 
 
 @router.get("/overview", response_model=InsightsOverview)
-def overview() -> InsightsOverview:
+def overview(_admin: dict = Depends(require_admin)) -> InsightsOverview:
     """Return the executive KPI snapshot.
 
     Fields sourced from optional parquet files return empty lists or None when
