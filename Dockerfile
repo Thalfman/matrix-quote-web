@@ -33,7 +33,12 @@ COPY service ./service
 COPY backend ./backend
 COPY --from=frontend /app/frontend/dist ./frontend/dist
 
-RUN mkdir -p /data/data/master /data/models
+RUN groupadd --system --gid 10001 app \
+    && useradd --system --uid 10001 --gid 10001 --home-dir /app --shell /usr/sbin/nologin app \
+    && mkdir -p /data/data/master /data/models \
+    && chown -R app:app /app /data
+
+USER app
 
 EXPOSE 8000
 CMD ["sh", "-c", "gunicorn backend.app.main:app -k uvicorn.workers.UvicornWorker -w 2 -t 600 -b 0.0.0.0:${PORT}"]
