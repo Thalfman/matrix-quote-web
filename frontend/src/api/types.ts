@@ -134,20 +134,21 @@ export type ExplainedQuoteResponse = {
   neighbors?: NeighborProject[] | null;
 };
 
-export type SavedQuoteCreate = {
+export type SavedQuoteCreateBody = {
   name: string;
   project_name: string;
   client_name?: string | null;
   notes?: string | null;
-  created_by: string;
   inputs: QuoteInput;
   prediction: QuotePrediction;
   quoted_hours_by_bucket?: Record<string, number> | null;
 };
 
-export type SavedQuote = SavedQuoteCreate & {
+// Response type — created_by filled server-side from the JWT claim.
+export type SavedQuote = SavedQuoteCreateBody & {
   id: string;
   created_at: string;
+  created_by: string;
 };
 
 export type SavedQuoteSummary = {

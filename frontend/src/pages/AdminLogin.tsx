@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 import { api, setAdminToken } from "@/api/client";
 import { LoginResponse } from "@/api/types";
+import { getDisplayName } from "@/lib/displayName";
 
 type LocationState = { from?: { pathname?: string } };
 
@@ -19,7 +20,8 @@ export function AdminLogin() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const { data } = await api.post<LoginResponse>("/admin/login", { password });
+      const name = getDisplayName() || undefined;
+      const { data } = await api.post<LoginResponse>("/admin/login", { password, name });
       setAdminToken(data.token);
       toast.success("Signed in");
       navigate(redirectTo, { replace: true });

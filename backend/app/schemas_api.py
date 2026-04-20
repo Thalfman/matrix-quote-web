@@ -46,6 +46,7 @@ __all__ = [
     "OperationDrivers",
     "NeighborProject",
     "ExplainedQuoteResponse",
+    "SavedQuoteCreateBody",
     "SavedQuoteCreate",
     "SavedQuote",
     "SavedQuoteSummary",
@@ -225,15 +226,20 @@ class ExplainedQuoteResponse(BaseModel):
     neighbors: list[NeighborProject] | None = None
 
 
-class SavedQuoteCreate(BaseModel):
+class SavedQuoteCreateBody(BaseModel):
+    """Public request schema — `created_by` is derived server-side from the JWT."""
     name: str = Field(min_length=1, max_length=120)
     project_name: str = Field(min_length=1, max_length=200)
     client_name: str | None = Field(default=None, max_length=200)
     notes: str | None = Field(default=None, max_length=1000)
-    created_by: str = Field(min_length=1, max_length=120)
     inputs: QuoteInput
     prediction: QuotePrediction
     quoted_hours_by_bucket: dict[str, float] | None = None
+
+
+class SavedQuoteCreate(SavedQuoteCreateBody):
+    """Internal write model — includes trusted `created_by` from the token."""
+    created_by: str = Field(min_length=1, max_length=120)
 
 
 class SavedQuote(SavedQuoteCreate):

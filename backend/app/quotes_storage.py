@@ -145,7 +145,7 @@ def delete(id_: str) -> bool:
     return True
 
 
-def duplicate(id_: str) -> SavedQuote | None:
+def duplicate(id_: str, created_by: str | None = None) -> SavedQuote | None:
     src = get(id_)
     if src is None:
         return None
@@ -154,7 +154,7 @@ def duplicate(id_: str) -> SavedQuote | None:
         project_name=src.project_name,
         client_name=src.client_name,
         notes=src.notes,
-        created_by=src.created_by,
+        created_by=created_by or src.created_by,
         inputs=src.inputs,
         prediction=src.prediction,
         quoted_hours_by_bucket=src.quoted_hours_by_bucket,

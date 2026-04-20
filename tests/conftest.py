@@ -35,3 +35,37 @@ def admin_client(client: TestClient) -> TestClient:
     token = resp.json()["token"]
     client.headers.update({"Authorization": f"Bearer {token}"})
     return client
+
+
+@pytest.fixture
+def saved_quote_payload() -> dict:
+    return {
+        "name": "Draft A",
+        "project_name": "Acme Line 3",
+        "client_name": None,
+        "notes": None,
+        "inputs": {
+            "industry_segment": "Automotive",
+            "system_category": "Machine Tending",
+            "automation_level": "Robotic",
+            "plc_family": "AB Compact Logix",
+            "hmi_family": "AB PanelView Plus",
+            "vision_type": "2D",
+            "stations_count": 8,
+        },
+        "prediction": {
+            "ops": {
+                "mechanical_hours": {
+                    "p50": 100, "p10": 80, "p90": 120,
+                    "std": 10, "rel_width": 0.4, "confidence": "medium",
+                },
+            },
+            "total_p50": 100, "total_p10": 80, "total_p90": 120,
+            "sales_buckets": {
+                "mechanical": {
+                    "p50": 100, "p10": 80, "p90": 120,
+                    "rel_width": 0.4, "confidence": "medium",
+                },
+            },
+        },
+    }

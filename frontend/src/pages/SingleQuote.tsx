@@ -110,7 +110,6 @@ export function SingleQuote() {
       await save.mutateAsync({
         name,
         project_name: projectName,
-        created_by: ensureDisplayName(),
         inputs: transformToQuoteInput(form.getValues()),
         prediction: result.prediction,
         quoted_hours_by_bucket: quotedHoursByBucket as Record<string, number>,
