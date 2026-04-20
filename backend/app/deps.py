@@ -63,11 +63,17 @@ def get_settings() -> Settings:
 JWT_ALGORITHM = "HS256"
 
 
-def create_admin_token(settings: Settings) -> tuple[str, datetime]:
+def create_admin_token(
+    settings: Settings, display_name: str = "admin"
+) -> tuple[str, datetime]:
     expires_at = datetime.now(UTC) + timedelta(
         hours=settings.admin_token_expiry_hours
     )
-    claims = {"sub": "admin", "exp": expires_at}
+    claims = {
+        "sub": "admin",
+        "name": display_name or "admin",
+        "exp": expires_at,
+    }
     token = jwt.encode(claims, settings.admin_jwt_secret, algorithm=JWT_ALGORITHM)
     return token, expires_at
 
@@ -81,7 +87,7 @@ def verify_admin_password(settings: Settings, supplied: str) -> bool:
 def require_admin(
     authorization: Annotated[str | None, Header()] = None,
     settings: Annotated[Settings, Depends(get_settings)] = None,
-) -> str:
+) -> dict[str, str]:
     if not authorization or not authorization.lower().startswith("bearer "):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -90,7 +96,9 @@ def require_admin(
         )
     token = authorization.split(" ", 1)[1]
     try:
-        claims = jwt.decode(token, settings.admin_jwt_secret, algorithms=[JWT_ALGORITHM])
+        claims = jwt.decode(
+            token, settings.admin_jwt_secret, algorithms=[JWT_ALGORITHM]
+        )
     except JWTError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -102,4 +110,4 @@ def require_admin(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token subject",
         )
-    return "admin"
+    return {"sub": "admin", "name": str(claims.get("name") or "admin")}

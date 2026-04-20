@@ -91,6 +91,7 @@ class MetricsSummary(BaseModel):
 
 class LoginRequest(BaseModel):
     password: str
+    name: str | None = Field(default=None, max_length=120)
 
 
 class LoginResponse(BaseModel):

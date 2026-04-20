@@ -60,3 +60,26 @@ def test_empty_admin_password_refuses_startup(monkeypatch):
     with pytest.raises(RuntimeError, match="ADMIN_PASSWORD"):
         get_settings()
     get_settings.cache_clear()
+
+
+def test_login_accepts_display_name_and_claim_round_trips(client):
+    resp = client.post(
+        "/api/admin/login",
+        json={"password": "test-password", "name": "Alice"},
+    )
+    assert resp.status_code == 200
+    token = resp.json()["token"]
+
+    from jose import jwt
+    claims = jwt.decode(token, "test-secret-at-least-32-chars-long!!", algorithms=["HS256"])
+    assert claims["sub"] == "admin"
+    assert claims["name"] == "Alice"
+
+
+def test_login_without_name_falls_back_to_admin(client):
+    resp = client.post("/api/admin/login", json={"password": "test-password"})
+    assert resp.status_code == 200
+    token = resp.json()["token"]
+    from jose import jwt
+    claims = jwt.decode(token, "test-secret-at-least-32-chars-long!!", algorithms=["HS256"])
+    assert claims["name"] == "admin"
