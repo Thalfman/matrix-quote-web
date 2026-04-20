@@ -55,7 +55,7 @@ def test_saved_quote_pdf_requires_auth(client):
 
 
 def test_adhoc_pdf_filename_is_header_safe(client, saved_quote_payload):
-    # Inject quote + CRLF + semicolon into project_name to attempt header injection
+    # Inject quote + CRLF + semicolon + colon into project_name to attempt header injection.
     payload = {
         "name": "Draft",
         "project_name": 'Bad"Name;\r\nX-Injected: 1',
@@ -66,11 +66,8 @@ def test_adhoc_pdf_filename_is_header_safe(client, saved_quote_payload):
     resp = client.post("/api/quote/pdf", json=payload)
     assert resp.status_code == 200
     cd = resp.headers["content-disposition"]
-    # Must not contain raw quote/CRLF/semicolon/colon from the injected value
-    assert "\r" not in cd and "\n" not in cd
-    # Confirm the sanitized filename is interpolated (all suspect chars replaced)
-    # The value must NOT contain an unescaped '"', ';', or embedded header.
-    # Header format: 'attachment; filename="Matrix-Quote-<safe>-YYYYMMDD.pdf"'
-    # There is exactly one ';' separating 'attachment' from 'filename='; no others.
-    assert cd.count(";") == 1
-    assert "X-Injected" not in cd
+    assert cd.startswith('attachment; filename="') and cd.endswith('"')
+    filename_value = cd[len('attachment; filename="'):-1]
+    # No char that could escape the quoted-string context or inject a new header.
+    for bad in ('"', ";", ":", "\r", "\n"):
+        assert bad not in filename_value
