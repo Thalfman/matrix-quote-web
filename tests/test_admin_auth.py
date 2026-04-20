@@ -83,3 +83,12 @@ def test_login_without_name_falls_back_to_admin(client):
     from jose import jwt
     claims = jwt.decode(token, "test-secret-at-least-32-chars-long!!", algorithms=["HS256"])
     assert claims["name"] == "admin"
+
+
+def test_admin_login_rate_limit_kicks_in(client):
+    """6th wrong-password attempt in a minute returns 429, not 401."""
+    for _ in range(5):
+        r = client.post("/api/admin/login", json={"password": "wrong"})
+        assert r.status_code == 401
+    r = client.post("/api/admin/login", json={"password": "wrong"})
+    assert r.status_code == 429
