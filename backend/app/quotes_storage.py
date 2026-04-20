@@ -33,6 +33,14 @@ COLUMNS = [
 ]
 
 
+def _nan_to_none(row: dict[str, Any]) -> dict[str, Any]:
+    """Parquet round-trips stored None → NaN; convert back so pydantic validators accept."""
+    return {
+        k: (None if isinstance(v, float) and pd.isna(v) else v)
+        for k, v in row.items()
+    }
+
+
 def _load() -> pd.DataFrame:
     path = quotes_parquet_path()
     if not path.exists():
@@ -102,7 +110,7 @@ def list_all(
             id=r["id"],
             name=r["name"],
             project_name=r["project_name"],
-            client_name=r["client_name"],
+            client_name=r.get("client_name"),
             industry_segment=r["industry_segment"],
             hours=float(r["hours"]),
             range_low=float(r["range_low"]),
@@ -110,7 +118,7 @@ def list_all(
             created_at=datetime.fromisoformat(r["created_at"]),
             created_by=r["created_by"],
         )
-        for r in df.to_dict(orient="records")
+        for r in (_nan_to_none(rec) for rec in df.to_dict(orient="records"))
     ]
     return SavedQuoteList(total=total, rows=rows)
 
@@ -120,12 +128,12 @@ def get(id_: str) -> SavedQuote | None:
     match = df[df["id"] == id_]
     if match.empty:
         return None
-    r = match.iloc[0].to_dict()
+    r = _nan_to_none(match.iloc[0].to_dict())
     return SavedQuote(
         id=r["id"],
         name=r["name"],
         project_name=r["project_name"],
-        client_name=r["client_name"],
+        client_name=r.get("client_name"),
         notes=r.get("notes"),
         created_by=r["created_by"],
         created_at=datetime.fromisoformat(r["created_at"]),
