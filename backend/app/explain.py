@@ -9,8 +9,11 @@ so pred_contrib is not available.  The shap fallback is always used.
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 import joblib
 import numpy as np
@@ -170,6 +173,7 @@ def _output_feature_names(preprocessor) -> list[str]:
     try:
         return list(preprocessor.get_feature_names_out())
     except Exception:
+        logger.exception("get_feature_names_out failed; falling back to config feature list")
         # Fall back to best-effort: numerics then categoricals by config.
         return QUOTE_NUM_FEATURES + QUOTE_CAT_FEATURES
 

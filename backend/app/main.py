@@ -20,12 +20,14 @@ from slowapi.middleware import SlowAPIMiddleware
 
 from . import demo
 from .deps import get_settings, limiter
+from .logging_config import configure_logging
 from .middleware import SecurityHeadersMiddleware
 from .paths import ensure_runtime_dirs
 from .routes import admin, insights, metrics, quote, quotes
 
 
 def create_app() -> FastAPI:
+    configure_logging()
     settings = get_settings()
 
     if "*" in settings.cors_origins_list and not os.environ.get("PYTEST_CURRENT_TEST"):
