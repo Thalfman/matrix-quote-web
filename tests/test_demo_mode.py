@@ -128,6 +128,14 @@ def test_admin_load_requires_auth(tmp_path, monkeypatch):
     assert r.status_code == 401, f"Expected 401, got {r.status_code}: {r.text}"
 
 
+def test_demo_status_round_trip_is_utf8_safe(tmp_path, monkeypatch):
+    monkeypatch.setenv("DATA_DIR", str(tmp_path))
+    from backend.app import demo
+    demo.write_status({"is_demo": True, "note": "café"})  # non-ASCII
+    got = demo.read_status()
+    assert got.get("note") == "café"
+
+
 @pytest.mark.skipif(not DEMO_ROOT.exists(), reason="demo_assets/ not generated")
 def test_admin_load_succeeds_when_empty(tmp_path, monkeypatch):
     """With a valid admin token and empty DATA_DIR, load endpoint seeds demo data."""
