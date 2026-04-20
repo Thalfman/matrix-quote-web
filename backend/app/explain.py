@@ -13,8 +13,6 @@ import logging
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger(__name__)
-
 import joblib
 import numpy as np
 import pandas as pd
@@ -28,6 +26,8 @@ from .schemas_api import (
     OperationDrivers,
     QuoteInput,
 )
+
+logger = logging.getLogger(__name__)
 
 # Human-readable labels for raw feature names.
 FEATURE_LABELS: dict[str, str] = {

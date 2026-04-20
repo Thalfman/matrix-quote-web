@@ -1,8 +1,5 @@
 from fastapi.testclient import TestClient
 
-import pytest
-
-
 VALID_QUOTE_INPUT = {
     "industry_segment": "Automotive",
     "system_category": "Machine Tending",

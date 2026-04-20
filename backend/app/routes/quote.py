@@ -39,17 +39,15 @@ def _validate_extension(filename: str | None) -> str:
 
 def _stream_to_bounded_buffer(file: UploadFile) -> io.BytesIO:
     """Copy the upload to a bounded SpooledTemporaryFile; 413 on spill."""
-    buf = SpooledTemporaryFile(max_size=MAX_UPLOAD_BYTES)
-    total = 0
-    while chunk := file.file.read(_CHUNK):
-        total += len(chunk)
-        if total > MAX_UPLOAD_BYTES:
-            raise HTTPException(status_code=413, detail="File too large (max 10 MB).")
-        buf.write(chunk)
-    buf.seek(0)
-    mem = io.BytesIO(buf.read())
-    buf.close()
-    return mem
+    with SpooledTemporaryFile(max_size=MAX_UPLOAD_BYTES) as buf:
+        total = 0
+        while chunk := file.file.read(_CHUNK):
+            total += len(chunk)
+            if total > MAX_UPLOAD_BYTES:
+                raise HTTPException(status_code=413, detail="File too large (max 10 MB).")
+            buf.write(chunk)
+        buf.seek(0)
+        return io.BytesIO(buf.read())
 
 
 def _read_upload(file: UploadFile, sheet: str | None) -> pd.DataFrame:

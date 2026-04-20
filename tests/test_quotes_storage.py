@@ -1,6 +1,7 @@
 # tests/test_quotes_storage.py
 from __future__ import annotations
 
+import threading
 from datetime import datetime
 
 import pytest
@@ -98,9 +99,6 @@ def test_get_round_trips_null_nullable_fields():
     assert fetched is not None
     assert fetched.client_name is None
     assert fetched.notes is None
-
-
-import threading
 
 
 def test_concurrent_creates_all_persist(saved_quote_payload, admin_client):
