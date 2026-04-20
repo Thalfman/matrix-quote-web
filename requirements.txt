@@ -1,6 +1,6 @@
 # Production dependencies. Installed by Railway from the repo root.
 # Core ML library (vendored from matrix_quote_app) depends on:
-pandas>=2.0,<3
+pandas>=2.0,<4
 numpy>=1.26,<3
 scikit-learn>=1.5,<1.6
 scipy>=1.13,<1.17
