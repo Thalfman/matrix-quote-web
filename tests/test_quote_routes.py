@@ -29,3 +29,12 @@ def test_batch_quote_returns_409_when_models_not_ready(client: TestClient) -> No
         files={"file": ("q.csv", b"industry_segment\nAutomotive\n", "text/csv")},
     )
     assert resp.status_code == 409
+
+
+def test_batch_preview_rejects_non_xlsx_with_400(client):
+    resp = client.post(
+        "/api/quote/batch/preview",
+        files={"file": ("garbage.xlsx", b"not an excel file", "application/vnd.ms-excel")},
+    )
+    assert resp.status_code == 400
+    assert "Could not parse" in resp.json()["detail"]

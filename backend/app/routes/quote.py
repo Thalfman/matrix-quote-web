@@ -76,7 +76,12 @@ def batch_preview(file: UploadFile = File(...)) -> dict:  # noqa: B008
     if len(raw) > MAX_UPLOAD_BYTES:
         raise HTTPException(status_code=413, detail="File too large (max 10 MB).")
     buf = io.BytesIO(raw)
-    xls = pd.ExcelFile(buf)
+    try:
+        xls = pd.ExcelFile(buf)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=400, detail=f"Could not parse file: {exc}"
+        ) from exc
     columns_per_sheet: dict[str, list[str]] = {}
     for s in xls.sheet_names:
         df = pd.read_excel(xls, sheet_name=s, nrows=0)
