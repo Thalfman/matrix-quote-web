@@ -1,5 +1,5 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { renderWithProviders } from "@/test/render";
 import { AdminLogin } from "./AdminLogin";
@@ -22,6 +22,11 @@ import { api } from "@/api/client";
 const mockPost = vi.mocked(api.post);
 
 describe("AdminLogin", () => {
+  afterEach(() => {
+    mockPost.mockReset();
+    localStorage.clear();
+  });
+
   it("renders the teal eyebrow 'Admin · access'", () => {
     renderWithProviders(<AdminLogin />);
     expect(screen.getByText("Admin · access")).toBeInTheDocument();
@@ -39,6 +44,7 @@ describe("AdminLogin", () => {
   });
 
   it("calls api.post with { password } on /admin/login when form is submitted", async () => {
+    localStorage.clear();
     mockPost.mockResolvedValue({ data: { token: "tok123" } });
     renderWithProviders(<AdminLogin />);
 
@@ -47,6 +53,26 @@ describe("AdminLogin", () => {
     fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
 
     await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(1));
-    expect(mockPost).toHaveBeenCalledWith("/admin/login", { password: "secret" });
+    expect(mockPost).toHaveBeenCalledWith("/admin/login", {
+      password: "secret",
+      name: undefined,
+    });
+  });
+
+  it("sends the stored display name as 'name' when one is saved locally", async () => {
+    localStorage.setItem("matrix.displayName", "Alice");
+    mockPost.mockResolvedValue({ data: { token: "tok123" } });
+    renderWithProviders(<AdminLogin />);
+
+    const input = screen.getByLabelText(/password/i);
+    fireEvent.change(input, { target: { value: "secret" } });
+    fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
+
+    await waitFor(() => expect(mockPost).toHaveBeenCalledTimes(1));
+    expect(mockPost).toHaveBeenCalledWith("/admin/login", {
+      password: "secret",
+      name: "Alice",
+    });
+    localStorage.clear();
   });
 });

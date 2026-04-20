@@ -1,23 +1,34 @@
 # backend/app/routes/quotes.py
 from __future__ import annotations
 
+import re
 from datetime import datetime
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from .. import quotes_storage
+from ..deps import require_admin
 from ..pdf import render_quote_pdf
 from ..schemas_api import (
     SavedQuote,
     SavedQuoteCreate,
+    SavedQuoteCreateBody,
     SavedQuoteList,
 )
 
 router = APIRouter(prefix="/api/quotes", tags=["quotes"])
 
+_FILENAME_SAFE = re.compile(r"[^A-Za-z0-9_.-]+")
+
+
+def _safe_filename_part(value: str, max_len: int = 60) -> str:
+    return _FILENAME_SAFE.sub("-", value).strip("-")[:max_len] or "quote"
+
 
 @router.get("", response_model=SavedQuoteList)
 def list_quotes(
+    _claim: Annotated[dict, Depends(require_admin)],
     project: str | None = None,
     industry: str | None = None,
     search: str | None = None,
@@ -28,7 +39,11 @@ def list_quotes(
 
 
 @router.post("", response_model=SavedQuote, status_code=status.HTTP_201_CREATED)
-def create_quote(payload: SavedQuoteCreate) -> SavedQuote:
+def create_quote(
+    body: SavedQuoteCreateBody,
+    claim: Annotated[dict, Depends(require_admin)],
+) -> SavedQuote:
+    payload = SavedQuoteCreate(**body.model_dump(), created_by=claim["name"])
     return quotes_storage.create(payload)
 
 
@@ -37,12 +52,18 @@ def _quote_number(created_at: datetime) -> str:
 
 
 @router.get("/{quote_id}/pdf")
-def get_quote_pdf(quote_id: str) -> Response:
+def get_quote_pdf(
+    quote_id: str,
+    _claim: Annotated[dict, Depends(require_admin)],
+) -> Response:
     q = quotes_storage.get(quote_id)
     if q is None:
         raise HTTPException(status_code=404, detail="Quote not found")
     pdf_bytes = render_quote_pdf(q, quote_number=_quote_number(q.created_at))
-    fname = f"Matrix-Quote-{q.project_name.replace(' ', '-')}-{q.created_at:%Y%m%d}.pdf"
+    fname = (
+        f"Matrix-Quote-{_safe_filename_part(q.project_name)}-"
+        f"{q.created_at:%Y%m%d}.pdf"
+    )
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
@@ -51,7 +72,10 @@ def get_quote_pdf(quote_id: str) -> Response:
 
 
 @router.get("/{quote_id}", response_model=SavedQuote)
-def get_quote(quote_id: str) -> SavedQuote:
+def get_quote(
+    quote_id: str,
+    _claim: Annotated[dict, Depends(require_admin)],
+) -> SavedQuote:
     q = quotes_storage.get(quote_id)
     if q is None:
         raise HTTPException(status_code=404, detail="Quote not found")
@@ -59,7 +83,10 @@ def get_quote(quote_id: str) -> SavedQuote:
 
 
 @router.delete("/{quote_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_quote(quote_id: str) -> Response:
+def delete_quote(
+    quote_id: str,
+    _claim: Annotated[dict, Depends(require_admin)],
+) -> Response:
     if not quotes_storage.delete(quote_id):
         raise HTTPException(status_code=404, detail="Quote not found")
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -70,8 +97,11 @@ def delete_quote(quote_id: str) -> Response:
     response_model=SavedQuote,
     status_code=status.HTTP_201_CREATED,
 )
-def duplicate_quote(quote_id: str) -> SavedQuote:
-    q = quotes_storage.duplicate(quote_id)
+def duplicate_quote(
+    quote_id: str,
+    claim: Annotated[dict, Depends(require_admin)],
+) -> SavedQuote:
+    q = quotes_storage.duplicate(quote_id, created_by=claim["name"])
     if q is None:
         raise HTTPException(status_code=404, detail="Quote not found")
     return q

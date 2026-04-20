@@ -13,64 +13,21 @@ except OSError:
         allow_module_level=True,
     )
 
-from fastapi.testclient import TestClient  # noqa: E402
 
-
-@pytest.fixture()
-def client(tmp_path, monkeypatch):
-    monkeypatch.setenv("DATA_DIR", str(tmp_path))
-    from importlib import reload
-
-    from backend.app import main, paths
-    reload(paths)
-    reload(main)
-    return TestClient(main.app)
-
-
-def _create_body():
+def _adhoc_body(saved_quote_payload):
     return {
-        "name": "Draft A",
-        "project_name": "Acme Line 3",
-        "client_name": "Acme Industrial",
+        "name": "Draft",
+        "project_name": "Ad Hoc",
         "created_by": "Tester",
-        "inputs": {
-            "industry_segment": "Automotive",
-            "system_category": "Machine Tending",
-            "automation_level": "Robotic",
-            "plc_family": "AB Compact Logix",
-            "hmi_family": "AB PanelView Plus",
-            "vision_type": "2D",
-            "stations_count": 8,
-        },
-        "prediction": {
-            "ops": {
-                "mechanical_hours": {
-                    "p50": 100, "p10": 80, "p90": 120,
-                    "std": 10, "rel_width": 0.4, "confidence": "medium",
-                },
-            },
-            "total_p50": 1200, "total_p10": 1000, "total_p90": 1400,
-            "sales_buckets": {
-                "mechanical": {
-                    "p50": 500, "p10": 450, "p90": 560,
-                    "rel_width": 0.2, "confidence": "medium",
-                },
-                "electrical": {
-                    "p50": 420, "p10": 380, "p90": 470,
-                    "rel_width": 0.2, "confidence": "medium",
-                },
-                "controls": {
-                    "p50": 280, "p10": 240, "p90": 320,
-                    "rel_width": 0.3, "confidence": "low",
-                },
-            },
-        },
+        "inputs": saved_quote_payload["inputs"],
+        "prediction": saved_quote_payload["prediction"],
     }
 
 
-def test_saved_quote_pdf_download(client):
-    created = client.post("/api/quotes", json=_create_body()).json()
-    r = client.get(f"/api/quotes/{created['id']}/pdf")
+def test_saved_quote_pdf_download(admin_client, saved_quote_payload):
+    payload = {**saved_quote_payload, "project_name": "Acme Line 3"}
+    created = admin_client.post("/api/quotes", json=payload).json()
+    r = admin_client.get(f"/api/quotes/{created['id']}/pdf")
     assert r.status_code == 200
     assert r.headers["content-type"] == "application/pdf"
     assert len(r.content) > 5000  # non-trivial body
@@ -78,18 +35,20 @@ def test_saved_quote_pdf_download(client):
     assert "Matrix-Quote-Acme-Line-3" in disp
 
 
-def test_adhoc_pdf(client):
-    r = client.post("/api/quote/pdf", json={
-        "name": "Draft", "project_name": "Ad Hoc",
-        "created_by": "Tester",
-        "inputs":     _create_body()["inputs"],
-        "prediction": _create_body()["prediction"],
-    })
+def test_adhoc_pdf(client, saved_quote_payload):
+    # /api/quote/pdf is the ad-hoc (unauthenticated) PDF endpoint — different
+    # from the gated /api/quotes/{id}/pdf route.
+    r = client.post("/api/quote/pdf", json=_adhoc_body(saved_quote_payload))
     assert r.status_code == 200
     assert r.headers["content-type"] == "application/pdf"
     assert len(r.content) > 5000
 
 
-def test_saved_quote_pdf_404_when_missing(client):
-    r = client.get("/api/quotes/does-not-exist/pdf")
+def test_saved_quote_pdf_404_when_missing(admin_client):
+    r = admin_client.get("/api/quotes/does-not-exist/pdf")
     assert r.status_code == 404
+
+
+def test_saved_quote_pdf_requires_auth(client):
+    r = client.get("/api/quotes/any-id/pdf")
+    assert r.status_code == 401

@@ -10,7 +10,7 @@ import {
   QuoteInput,
   QuotePrediction,
   SavedQuote,
-  SavedQuoteCreate,
+  SavedQuoteCreateBody,
   SavedQuoteList,
   TrainingRunRow,
 } from "./types";
@@ -50,7 +50,7 @@ export function useSavedQuote(id: string | undefined) {
 
 export function useSaveScenario() {
   const qc = useQueryClient();
-  return useMutation<SavedQuote, unknown, SavedQuoteCreate>({
+  return useMutation<SavedQuote, unknown, SavedQuoteCreateBody>({
     mutationFn: async (body) =>
       (await api.post<SavedQuote>("/quotes", body)).data,
     onSuccess: () => qc.invalidateQueries({ queryKey: ["savedQuotes"] }),
