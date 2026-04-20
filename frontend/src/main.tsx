@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 
 import App from "./App";
+import { RootErrorBoundary } from "./components/RootErrorBoundary";
 import "./styles/globals.css";
 import "./styles/dark-mode.css";
 
@@ -16,11 +17,13 @@ const queryClient = new QueryClient({
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <App />
-        <Toaster richColors position="top-right" />
-      </BrowserRouter>
-    </QueryClientProvider>
+    <RootErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <App />
+          <Toaster richColors position="top-right" />
+        </BrowserRouter>
+      </QueryClientProvider>
+    </RootErrorBoundary>
   </React.StrictMode>,
 );
