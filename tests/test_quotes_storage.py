@@ -98,3 +98,27 @@ def test_get_round_trips_null_nullable_fields():
     assert fetched is not None
     assert fetched.client_name is None
     assert fetched.notes is None
+
+
+import threading
+
+
+def test_concurrent_creates_all_persist(saved_quote_payload, admin_client):
+    """5 concurrent POSTs must all end up in storage."""
+    from backend.app import quotes_storage
+    from backend.app.schemas_api import SavedQuoteCreate
+
+    def make_one(i: int) -> None:
+        payload = SavedQuoteCreate(**saved_quote_payload, created_by=f"tester-{i}")
+        payload = payload.model_copy(update={"name": f"Concurrent {i}"})
+        quotes_storage.create(payload)
+
+    threads = [threading.Thread(target=make_one, args=(i,)) for i in range(5)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    rows = quotes_storage.list_all().rows
+    names = sorted(r.name for r in rows)
+    assert names == [f"Concurrent {i}" for i in range(5)]
