@@ -1,6 +1,6 @@
 # Multi-stage build: compile the SPA, then copy into the Python runtime image.
 
-FROM node:20-bookworm-slim AS frontend
+FROM node:25-bookworm-slim AS frontend
 WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json* ./
 RUN npm install --no-audit --no-fund
