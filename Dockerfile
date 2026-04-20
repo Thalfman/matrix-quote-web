@@ -23,6 +23,7 @@ RUN apt-get update \
         libcairo2 \
         libharfbuzz0b \
         fonts-liberation \
+        tini \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt ./
@@ -41,4 +42,9 @@ RUN groupadd --system --gid 10001 app \
 USER app
 
 EXPOSE 8000
-CMD ["sh", "-c", "gunicorn backend.app.main:app -k uvicorn.workers.UvicornWorker -w 2 -t 600 -b 0.0.0.0:${PORT}"]
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s \
+    CMD wget -qO- "http://127.0.0.1:${PORT:-8000}/api/health" >/dev/null || exit 1
+
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["sh", "-c", "gunicorn backend.app.main:app -k uvicorn.workers.UvicornWorker -w 2 -t 600 -b 0.0.0.0:${PORT:-8000}"]
