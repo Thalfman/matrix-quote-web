@@ -39,3 +39,32 @@ jobs:
       - run: npm run typecheck
       - run: npm run build
       - run: npm test
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
+        with:
+          python-version: "3.11"
+      - name: Install scanners
+        run: pip install pip-audit bandit
+      - name: Python dependency vulnerability scan (pip-audit)
+        # Four findings live in the load-bearing weasyprint/Pillow/fonttools pin cascade
+        # documented in requirements.txt. Remove these ignores when the weasyprint bump lands.
+        run: |
+          pip-audit -r requirements.txt --strict \
+            --ignore-vuln CVE-2025-68616 \
+            --ignore-vuln CVE-2026-25990 \
+            --ignore-vuln CVE-2026-40192 \
+            --ignore-vuln CVE-2025-66034
+      - name: Python SAST (bandit)
+        run: bandit -r backend -ll
+      - uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Node dependency vulnerability scan (npm audit)
+        working-directory: frontend
+        run: npm audit --omit=dev --audit-level=high
