@@ -20,6 +20,7 @@ from slowapi.middleware import SlowAPIMiddleware
 
 from . import demo
 from .deps import get_settings, limiter
+from .middleware import SecurityHeadersMiddleware
 from .paths import ensure_runtime_dirs
 from .routes import admin, insights, metrics, quote, quotes
 
@@ -45,6 +46,7 @@ def create_app() -> FastAPI:
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
     app.add_middleware(SlowAPIMiddleware)
+    app.add_middleware(SecurityHeadersMiddleware)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins_list,
