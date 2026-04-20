@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -25,6 +26,13 @@ from .routes import admin, insights, metrics, quote, quotes
 
 def create_app() -> FastAPI:
     settings = get_settings()
+
+    if "*" in settings.cors_origins_list and not os.environ.get("PYTEST_CURRENT_TEST"):
+        raise RuntimeError(
+            "CORS_ALLOW_ORIGINS=* is incompatible with allow_credentials=True. "
+            "Set an explicit origin list in production."
+        )
+
     ensure_runtime_dirs()
     demo.seed_if_enabled()
 
@@ -41,8 +49,8 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=settings.cors_origins_list,
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type", "X-Requested-With"],
     )
 
     app.include_router(metrics.router)
