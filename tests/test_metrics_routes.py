@@ -72,7 +72,7 @@ def test_metrics_calibration_empty_state(admin_client: TestClient) -> None:
 
 
 def test_metrics_headline_empty_state(admin_client: TestClient) -> None:
-    """headline endpoint returns a PerformanceHeadline with all None fields when nothing is trained."""
+    """headline returns PerformanceHeadline with all-None fields when nothing is trained."""
     resp = admin_client.get("/api/metrics/headline")
     assert resp.status_code == 200
     body = resp.json()

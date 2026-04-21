@@ -64,7 +64,8 @@ def test_batch_preview_413_on_oversized_upload(client):
     big_content = b"x" * (10 * 1024 * 1024 + 1)
     resp = client.post(
         "/api/quote/batch/preview",
-        files={"file": ("data.xlsx", big_content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+        files={"file": ("data.xlsx", big_content,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
     )
     assert resp.status_code == 413
     assert "10 MB" in resp.json()["detail"]
@@ -76,6 +77,7 @@ def test_batch_413_on_oversized_upload(client):
     # Use preview endpoint because /batch checks models-ready before reading the body.
     resp = client.post(
         "/api/quote/batch/preview",
-        files={"file": ("data.xlsx", big_content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+        files={"file": ("data.xlsx", big_content,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
     )
     assert resp.status_code == 413
