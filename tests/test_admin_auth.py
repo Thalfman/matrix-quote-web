@@ -104,3 +104,23 @@ def test_admin_login_rate_limit_kicks_in(client):
         assert r.status_code == 401
     r = client.post("/api/admin/login", json={"password": "wrong"})
     assert r.status_code == 429
+
+
+# Q-12: demo-load with missing demo_assets must return 200 (not 500).
+
+def test_demo_load_missing_assets_returns_200_not_500(admin_client, tmp_path, monkeypatch):
+    """POST /api/admin/demo/load must never 500 even when demo_assets/ is absent.
+
+    Monkeypatches demo_assets_dir to point to a non-existent directory so the
+    route must return loaded=False with a human-readable reason rather than
+    propagating the FileNotFoundError as a 500.
+    """
+    from backend.app import demo as demo_module
+    missing = tmp_path / "no_such_demo_assets"
+    monkeypatch.setattr(demo_module, "demo_assets_dir", lambda: missing)
+
+    resp = admin_client.post("/api/admin/demo/load")
+    assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
+    body = resp.json()
+    assert body["loaded"] is False
+    assert body["reason"] is not None

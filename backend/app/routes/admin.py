@@ -106,5 +106,8 @@ def reset(body: ResetRequest, _: dict = Depends(require_admin)) -> dict:
 
 @router.post("/demo/load", response_model=DemoLoadResponse)
 def load_demo(_: dict = Depends(require_admin)) -> DemoLoadResponse:
-    loaded, reason = demo.seed_on_demand()
+    try:
+        loaded, reason = demo.seed_on_demand()
+    except FileNotFoundError as exc:
+        return DemoLoadResponse(loaded=False, reason=str(exc))
     return DemoLoadResponse(loaded=loaded, reason=reason)
