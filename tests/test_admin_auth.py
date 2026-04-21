@@ -71,9 +71,16 @@ def test_login_accepts_display_name_and_claim_round_trips(client):
     token = resp.json()["token"]
 
     import jwt
-    claims = jwt.decode(token, "test-secret-at-least-32-chars-long!!", algorithms=["HS256"])
+    claims = jwt.decode(
+        token,
+        "test-secret-at-least-32-chars-long!!",
+        algorithms=["HS256"],
+        issuer="matrix-quote-web",
+    )
     assert claims["sub"] == "admin"
     assert claims["name"] == "Alice"
+    assert claims["iss"] == "matrix-quote-web"
+    assert "iat" in claims
 
 
 def test_login_without_name_falls_back_to_admin(client):
@@ -81,7 +88,12 @@ def test_login_without_name_falls_back_to_admin(client):
     assert resp.status_code == 200
     token = resp.json()["token"]
     import jwt
-    claims = jwt.decode(token, "test-secret-at-least-32-chars-long!!", algorithms=["HS256"])
+    claims = jwt.decode(
+        token,
+        "test-secret-at-least-32-chars-long!!",
+        algorithms=["HS256"],
+        issuer="matrix-quote-web",
+    )
     assert claims["name"] == "admin"
 
 

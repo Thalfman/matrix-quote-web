@@ -77,6 +77,8 @@ def create_admin_token(
     claims = {
         "sub": "admin",
         "name": display_name or "admin",
+        "iat": datetime.now(UTC),
+        "iss": "matrix-quote-web",
         "exp": expires_at,
     }
     token = jwt.encode(claims, settings.admin_jwt_secret, algorithm=JWT_ALGORITHM)
@@ -102,7 +104,10 @@ def require_admin(
     token = authorization.split(" ", 1)[1]
     try:
         claims = jwt.decode(
-            token, settings.admin_jwt_secret, algorithms=[JWT_ALGORITHM]
+            token,
+            settings.admin_jwt_secret,
+            algorithms=[JWT_ALGORITHM],
+            issuer="matrix-quote-web",
         )
     except PyJWTError as exc:
         raise HTTPException(
