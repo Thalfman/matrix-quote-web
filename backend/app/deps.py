@@ -91,8 +91,9 @@ def verify_admin_password(settings: Settings, supplied: str) -> bool:
 
 
 def require_admin(
+    *,
     authorization: Annotated[str | None, Header()] = None,
-    settings: Annotated[Settings, Depends(get_settings)] = None,
+    settings: Annotated[Settings, Depends(get_settings)],
 ) -> dict[str, str]:
     if not authorization or not authorization.lower().startswith("bearer "):
         raise HTTPException(
