@@ -146,6 +146,6 @@ def demo_status(_admin: dict = Depends(require_admin)) -> DemoStatus:
     status = demo.read_status()
     return DemoStatus(
         is_demo=bool(status.get("is_demo", False)),
-        enabled_env=demo._demo_enabled_env(),  # safe: read-only env probe
+        enabled_env=demo.is_enabled_via_env(),  # safe: read-only env probe
         has_real_data=demo.has_real_data(),
     )

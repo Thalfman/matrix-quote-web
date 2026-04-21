@@ -21,7 +21,7 @@ from .paths import (
 )
 
 
-def _demo_enabled_env() -> bool:
+def is_enabled_via_env() -> bool:
     return os.environ.get("ENABLE_DEMO", "").strip() in ("1", "true", "yes")
 
 
@@ -77,7 +77,7 @@ def _seed() -> None:
 
 def seed_if_enabled() -> None:
     """Startup hook: seeds only when ENABLE_DEMO=1 and DATA_DIR has no real data."""
-    if not _demo_enabled_env():
+    if not is_enabled_via_env():
         return
     if has_real_data():
         return
