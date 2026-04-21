@@ -10,6 +10,7 @@ so pred_contrib is not available.  The shap fallback is always used.
 from __future__ import annotations
 
 import logging
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -77,8 +78,14 @@ def _humanize(feature: str) -> str:
     return FEATURE_LABELS.get(feature, feature.replace("_", " ").title())
 
 
-def _load_bundle(op_path: Path) -> dict[str, Any]:
+@lru_cache(maxsize=None)
+def _load_bundle_cached(op_path: Path, mtime_ns: int) -> dict[str, Any]:
+    """Cache the joblib bundle keyed on path + mtime so a retrain invalidates it."""
     return joblib.load(op_path)
+
+
+def _load_bundle(op_path: Path) -> dict[str, Any]:
+    return _load_bundle_cached(op_path, op_path.stat().st_mtime_ns)
 
 
 def _discover_bundles() -> list[tuple[str, Path]]:
