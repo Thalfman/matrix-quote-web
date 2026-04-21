@@ -80,6 +80,7 @@ def single_quote(payload: QuoteInput) -> ExplainedQuoteResponse:
         )
 
     # Best-effort explainability. Never fail the quote because of it.
+    # Lazy import: shap TreeExplainer import is ~1s and only needed per-request.
     from ..explain import compute_drivers, compute_neighbors
 
     try:
