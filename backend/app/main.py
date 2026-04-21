@@ -39,10 +39,14 @@ def create_app() -> FastAPI:
     ensure_runtime_dirs()
     demo.seed_if_enabled()
 
+    is_prod = os.environ.get("ENV", "dev").lower() == "prod"
     app = FastAPI(
         title="Matrix Quote Web",
         version="0.1.0",
         description="Wraps the Matrix per-operation quoting engine for customer-facing estimation.",
+        docs_url=None if is_prod else "/docs",
+        redoc_url=None if is_prod else "/redoc",
+        openapi_url=None if is_prod else "/openapi.json",
     )
 
     app.state.limiter = limiter
