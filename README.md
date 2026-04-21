@@ -86,6 +86,8 @@ nested under `body.prediction` (not top-level), and `body.drivers` /
 `body.neighbors` carry per-quote explainability data. Both explain fields
 degrade gracefully to `null` if models don't support SHAP.
 
+Joblib bundles are loaded once per process and cached in-process by `explain.py` (keyed on file path + mtime). A retrain invalidates the cache automatically because the mtime changes, so subsequent requests after retraining pick up the new models without a restart.
+
 ### Saved-quotes API
 
 | Method | Path | Description |
@@ -162,6 +164,8 @@ The WeasyPrint PDF template lives in `backend/app/templates/`. The Jinja variabl
 
 The template renders in the Matrix ink (`#0D1B2A`) + amber (`#F2B61F`) + teal (`#1F8FA6`) + hairline (`#E5E1D8`) palette. Page 1 has a 3pt ink top band followed by a 1.5pt amber band. Numeric cells use JetBrains Mono with `font-variant-numeric: tabular-nums`. The confidence range label reads "90% CI".
 
+WeasyPrint is sandboxed via a custom `url_fetcher` in `backend/app/pdf.py` (`_scoped_url_fetcher`). It permits only `file://` URLs whose resolved path falls inside `backend/app/templates/` and blocks all remote (`http://`/`https://`) fetches — preventing server-side request forgery via crafted template input.
+
 ### Demo mode
 
 Set `ENABLE_DEMO=1` with an empty `DATA_DIR` to seed a synthetic dataset + pretrained models at startup:
@@ -196,8 +200,10 @@ cd frontend && npm test
 
 1. Connect the GitHub repo to a new Railway project.
 2. Attach a Volume to the service at `/data` (1 GB is plenty for this app).
-3. Set env vars: `ADMIN_PASSWORD`, `ADMIN_JWT_SECRET`, `DATA_DIR=/data`.
+3. Set env vars: `ADMIN_PASSWORD`, `ADMIN_JWT_SECRET`, `DATA_DIR=/data`, `ENV=prod`.
 4. Deploy — the Dockerfile builds the frontend and serves it alongside the API.
+
+Setting `ENV=prod` hides the interactive API docs (`/docs`, `/redoc`, `/openapi.json`). The default is `dev`, which keeps them available — useful for local development but should not be left open in production.
 
 **Git LFS:** `demo_assets/models/*.joblib` and `tests/fixtures/tiny_models/*.joblib` are stored in Git LFS. Run `git lfs install && git lfs pull` after cloning if the joblib files appear as pointer stubs. Existing joblib files already tracked before this change are not in LFS yet — a future `git lfs migrate import` will clean that up.
 
@@ -219,7 +225,7 @@ The Single Quote page (`/`) uses a two-column CSS-grid workspace on `≥lg` view
 
 Press `⌘/Ctrl+Enter` from anywhere on the page to submit the form; the submit button is labeled "Regenerate estimate". The form submit bar is solid ink with an amber `↵` / `⌘↵` hint.
 
-**Save flow:** the outlined "Save" button in the result panel prompts for a name and project name, then calls `POST /api/quotes` and toasts on success. `POST /api/quotes` (and the rest of `/api/quotes/*`) requires an admin bearer token; the server derives `created_by` from the `name` claim on the JWT. The display name is captured in the browser via `frontend/src/lib/displayName.ts` (stored in `localStorage`; the user is prompted once on first save) and forwarded to `POST /api/admin/login` as the optional `name` field — the body-level `created_by` is no longer accepted, so attribution is trusted only when it comes from the authenticated session. The Compare pill in ScenariosTab navigates to `/quotes` where saved scenarios can be bulk-selected.
+**Save flow:** the outlined "Save" button in the result panel prompts for a name and project name, then calls `POST /api/quotes` and toasts on success. `POST /api/quotes` (and the rest of `/api/quotes/*`) requires an admin bearer token; the server derives `created_by` from the `name` claim on the JWT. The JWT carries claims `sub`, `name`, `exp`, `iat`, and `iss="matrix-quote-web"`; tokens with a mismatched issuer are rejected at the `require_admin` dependency. The display name is captured in the browser via `frontend/src/lib/displayName.ts` (stored in `localStorage`; the user is prompted once on first save) and forwarded to `POST /api/admin/login` as the optional `name` field — the body-level `created_by` is no longer accepted, so attribution is trusted only when it comes from the authenticated session. The Compare pill in ScenariosTab navigates to `/quotes` where saved scenarios can be bulk-selected.
 
 **Export PDF (ad-hoc):** the solid-teal "Export" button in the result panel prompts for a project name, then calls `POST /api/quote/pdf` and triggers a browser download — no save required. The PDF is a 3-page Matrix-branded document: cover with headline estimate, per-bucket breakdown + input summary, and assumptions/disclaimers. The WeasyPrint template renders in the Matrix ink/amber/teal palette with JetBrains Mono tabular numerics; see [PDF template](#pdf-template) for details on the Jinja variables.
 
@@ -253,7 +259,7 @@ Four KPI cards rendered with display-hero numerics (Barlow Condensed, large weig
 | Path | Component | Description |
 |------|-----------|-------------|
 | `/` | `SingleQuote` | Two-column estimator cockpit |
-| `/batch` | `BatchQuotes` | Upload shell: dropzone, CSV schema reference panel, and placeholder recent-batches list (`BatchDropzone`, `BatchSchemaRef`, `BatchRecentList`). Drop/select toasts a stub message; no batch inference endpoint is wired yet. |
+| `/batch` | `BatchQuotes` | Upload shell: dropzone, CSV schema reference panel, and placeholder recent-batches list (`BatchDropzone`, `BatchSchemaRef`, `BatchRecentList`). The dropzone is disabled and shows a "Coming soon" overlay until the batch inference endpoint ships. |
 | `/quotes` | `Quotes` | Saved scenarios list |
 | `/quotes/compare` | `Compare` | Side-by-side scenario comparison |
 | `/performance` | `ModelPerformance` | Estimate accuracy dashboard |
