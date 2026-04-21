@@ -7,13 +7,11 @@ import {
 } from "../insights/chartTheme";
 
 export function MapeByOperation({ rows }: { rows: MetricRow[] }) {
-  const anyMape = rows.some(
-    (r) => "mape" in r && (r as unknown as { mape?: number }).mape != null,
-  );
+  const anyMape = rows.some((r) => r.mape != null);
   const data = rows
     .map((r) => ({
       op: r.target.replace(/_hours$/, ""),
-      mape: anyMape ? (r as unknown as { mape?: number }).mape ?? 0 : r.mae ?? 0,
+      mape: anyMape ? r.mape ?? 0 : r.mae ?? 0,
     }))
     .sort((a, b) => b.mape - a.mape);
 

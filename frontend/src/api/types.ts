@@ -77,6 +77,7 @@ export type MetricRow = {
   version?: string | null;
   rows?: number | null;
   mae?: number | null;
+  mape?: number | null;
   r2?: number | null;
   model_path?: string | null;
 };
