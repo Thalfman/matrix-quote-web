@@ -55,3 +55,27 @@ def test_batch_preview_rejects_non_xlsx_extension(client):
         files={"file": ("data.txt", b"hello", "text/plain")},
     )
     assert resp.status_code == 400
+
+
+# Q-12: 413 for > 10 MB upload.
+
+def test_batch_preview_413_on_oversized_upload(client):
+    """A file larger than 10 MB must return 413."""
+    big_content = b"x" * (10 * 1024 * 1024 + 1)
+    resp = client.post(
+        "/api/quote/batch/preview",
+        files={"file": ("data.xlsx", big_content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+    )
+    assert resp.status_code == 413
+    assert "10 MB" in resp.json()["detail"]
+
+
+def test_batch_413_on_oversized_upload(client):
+    """batch/preview also returns 413 when upload exceeds 10 MB (batch guards models first)."""
+    big_content = b"x" * (10 * 1024 * 1024 + 1)
+    # Use preview endpoint because /batch checks models-ready before reading the body.
+    resp = client.post(
+        "/api/quote/batch/preview",
+        files={"file": ("data.xlsx", big_content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")},
+    )
+    assert resp.status_code == 413

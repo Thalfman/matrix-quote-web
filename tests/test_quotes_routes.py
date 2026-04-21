@@ -80,3 +80,26 @@ def test_duplicate(admin_client, saved_quote_payload):
 def test_list_quotes_rejects_oversized_limit(admin_client):
     resp = admin_client.get("/api/quotes?limit=1000000")
     assert resp.status_code == 422
+
+
+# Q-12: pagination edge cases.
+
+def test_list_quotes_offset_beyond_total_returns_empty(admin_client, saved_quote_payload):
+    """offset >= total should return rows=[] with the correct total."""
+    admin_client.post("/api/quotes", json=saved_quote_payload)
+    resp = admin_client.get("/api/quotes?offset=9999")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["rows"] == []
+    assert body["total"] == 1
+
+
+def test_list_quotes_limit_one_returns_exactly_one(admin_client, saved_quote_payload):
+    """limit=1 returns exactly one row even when multiple exist."""
+    admin_client.post("/api/quotes", json=saved_quote_payload)
+    admin_client.post("/api/quotes", json=saved_quote_payload)
+    resp = admin_client.get("/api/quotes?limit=1")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert len(body["rows"]) == 1
+    assert body["total"] == 2
