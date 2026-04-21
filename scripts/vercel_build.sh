@@ -7,7 +7,10 @@
 set -euo pipefail
 
 echo "[vercel-build] installing python deps"
-python3 -m pip install --quiet --disable-pip-version-check pandas numpy scikit-learn joblib
+# --break-system-packages: Vercel's build image marks the system Python as
+# externally managed (PEP 668). The container is ephemeral so writing into
+# system site-packages is safe here.
+python3 -m pip install --break-system-packages --quiet --disable-pip-version-check pandas numpy scikit-learn joblib
 
 echo "[vercel-build] building demo static assets"
 python3 scripts/build_demo_static.py
