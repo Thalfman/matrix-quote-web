@@ -77,7 +77,7 @@ export function useDuplicateScenario() {
   });
 }
 
-async function _streamDownload(resp: { data: Blob }, fallbackName: string) {
+async function streamDownload(resp: { data: Blob }, fallbackName: string) {
   const url = URL.createObjectURL(resp.data);
   const a = document.createElement("a");
   a.href = url;
@@ -90,7 +90,7 @@ async function _streamDownload(resp: { data: Blob }, fallbackName: string) {
 
 export async function downloadScenarioPdf(id: string): Promise<void> {
   const resp = await api.get(`/quotes/${id}/pdf`, { responseType: "blob" });
-  _streamDownload(resp as { data: Blob }, `Matrix-Quote-${id}.pdf`);
+  streamDownload(resp as { data: Blob }, `Matrix-Quote-${id}.pdf`);
 }
 
 export async function downloadAdHocPdf(body: {
@@ -102,7 +102,7 @@ export async function downloadAdHocPdf(body: {
   prediction: QuotePrediction;
 }): Promise<void> {
   const resp = await api.post("/quote/pdf", body, { responseType: "blob" });
-  _streamDownload(resp as { data: Blob }, `Matrix-Quote-${body.project_name.replace(/\s+/g, "-")}.pdf`);
+  streamDownload(resp as { data: Blob }, `Matrix-Quote-${body.project_name.replace(/\s+/g, "-")}.pdf`);
 }
 
 export function useMetricsHistory() {
