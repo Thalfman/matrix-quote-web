@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import io
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 from tempfile import SpooledTemporaryFile
 
 import pandas as pd
@@ -80,6 +80,7 @@ def single_quote(payload: QuoteInput) -> ExplainedQuoteResponse:
         )
 
     # Best-effort explainability. Never fail the quote because of it.
+    # Lazy import: shap TreeExplainer import is ~1s and only needed per-request.
     from ..explain import compute_drivers, compute_neighbors
 
     try:
@@ -149,7 +150,7 @@ def batch_quote(
 @router.post("/pdf")
 def adhoc_pdf(payload: AdHocPdfRequest) -> Response:
     # Build a transient SavedQuote so the template doesn't need to branch.
-    now = datetime.utcnow()
+    now = datetime.now(UTC).replace(tzinfo=None)
     transient = SavedQuote(
         id="adhoc",
         created_at=now,

@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends
 
 from .. import insights, quotes_storage, storage
 from ..deps import require_admin
-from ..paths import calibration_path, metrics_history_path
+from ..paths import calibration_path, metrics_history_path, quotes_parquet_path
 from ..schemas_api import InsightsOverview
 
 router = APIRouter(prefix="/api/insights", tags=["insights"])
@@ -63,7 +63,6 @@ def overview(_admin: dict = Depends(require_admin)) -> InsightsOverview:
 
 
 def _quotes_as_df() -> pd.DataFrame:
-    from ..paths import quotes_parquet_path
     path = quotes_parquet_path()
     if not path.exists():
         return pd.DataFrame(columns=["created_at"])

@@ -18,74 +18,33 @@ vi.mock("sonner", () => ({
 // ─── BatchDropzone ────────────────────────────────────────────────────────────
 
 describe("BatchDropzone", () => {
-  it("clicking Select file then changing input emits Received toast with file name", () => {
+  it("renders coming-soon heading", () => {
     render(<BatchDropzone />);
-
-    const selectBtn = screen.getByRole("button", { name: /Select file/i });
-    // The button calls inputRef.current.click(); we can't fully test that in jsdom,
-    // but we can directly fire a change event on the hidden input.
-    const input = document.querySelector<HTMLInputElement>('input[type="file"]')!;
-    expect(input).not.toBeNull();
-
-    const file = new File(["data"], "x.csv", { type: "text/csv" });
-    Object.defineProperty(input, "files", { value: [file], configurable: true });
-    fireEvent.change(input);
-
-    expect(vi.mocked(toast.info)).toHaveBeenCalledWith(
-      expect.stringContaining("Received"),
-    );
-    expect(vi.mocked(toast.info)).toHaveBeenCalledWith(
-      expect.stringContaining("x.csv"),
-    );
-
-    // Reset for isolation
-    vi.mocked(toast.info).mockReset();
-
-    // Verify "Select file" button is rendered (existence / click path check)
-    expect(selectBtn).toBeInTheDocument();
+    expect(screen.getByText(/coming soon/i)).toBeInTheDocument();
   });
 
-  it("drag-and-drop a file emits Received toast with file name", () => {
+  it("renders as disabled (aria-disabled)", () => {
+    const { container } = render(<BatchDropzone />);
+    const dropzone = container.querySelector("[aria-disabled='true']");
+    expect(dropzone).not.toBeNull();
+  });
+
+  it("does not render interactive file input or Select/Download buttons", () => {
     render(<BatchDropzone />);
+    expect(document.querySelector('input[type="file"]')).toBeNull();
+    expect(screen.queryByRole("button", { name: /Select file/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Download template/i })).toBeNull();
+  });
 
-    const dropzone = screen
-      .getByText(/Drop a CSV or XLSX/i)
-      .closest("div[class]")!
-      .parentElement!;
+  it("does not emit any toast on drag-over or drop", () => {
+    const { container } = render(<BatchDropzone />);
+    const dropzone = container.firstChild as HTMLElement;
 
-    const file = new File(["data"], "dropped.csv", { type: "text/csv" });
-
-    // Build a minimal synthetic drag event with dataTransfer.files
-    const dataTransfer = { files: [file] } as unknown as DataTransfer;
-
+    const dataTransfer = { files: [] } as unknown as DataTransfer;
     fireEvent.dragOver(dropzone, { dataTransfer });
     fireEvent.drop(dropzone, { dataTransfer });
 
-    expect(vi.mocked(toast.info)).toHaveBeenCalledWith(
-      expect.stringContaining("Received"),
-    );
-    expect(vi.mocked(toast.info)).toHaveBeenCalledWith(
-      expect.stringContaining("dropped.csv"),
-    );
-
-    vi.mocked(toast.info).mockReset();
-  });
-
-  it("clicking Download template emits a toast containing Template (distinct message)", () => {
-    render(<BatchDropzone />);
-
-    const templateBtn = screen.getByRole("button", { name: /Download template/i });
-    fireEvent.click(templateBtn);
-
-    expect(vi.mocked(toast.info)).toHaveBeenCalledWith(
-      expect.stringContaining("Template"),
-    );
-
-    // Confirm it is NOT the upload message
-    const calls = vi.mocked(toast.info).mock.calls.map((c) => c[0] as string);
-    expect(calls.some((msg) => msg.includes("Received"))).toBe(false);
-
-    vi.mocked(toast.info).mockReset();
+    expect(vi.mocked(toast.info)).not.toHaveBeenCalled();
   });
 });
 

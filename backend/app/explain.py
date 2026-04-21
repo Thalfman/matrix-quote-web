@@ -5,11 +5,16 @@ Does NOT modify any vendored module.
 
 NOTE: Models are sklearn GradientBoostingRegressor bundles (not LightGBM/XGBoost),
 so pred_contrib is not available.  The shap fallback is always used.
+
+Joblib bundles are cached in-process by _load_bundle_cached (keyed on path +
+mtime_ns) so repeated requests skip disk I/O.  A retrain automatically
+invalidates the cache because the mtime changes.
 """
 
 from __future__ import annotations
 
 import logging
+from functools import cache
 from pathlib import Path
 from typing import Any
 
@@ -77,8 +82,14 @@ def _humanize(feature: str) -> str:
     return FEATURE_LABELS.get(feature, feature.replace("_", " ").title())
 
 
-def _load_bundle(op_path: Path) -> dict[str, Any]:
+@cache
+def _load_bundle_cached(op_path: Path, mtime_ns: int) -> dict[str, Any]:
+    """Cache the joblib bundle keyed on path + mtime so a retrain invalidates it."""
     return joblib.load(op_path)
+
+
+def _load_bundle(op_path: Path) -> dict[str, Any]:
+    return _load_bundle_cached(op_path, op_path.stat().st_mtime_ns)
 
 
 def _discover_bundles() -> list[tuple[str, Path]]:

@@ -22,6 +22,7 @@ type Props = {
 export function QuoteForm({ dropdowns, submitting, onSubmit, form, formRef }: Props) {
   const [compareOpen, setCompareOpen] = useState(false);
   const [quotedHours, setQuotedHours] = useState<Record<string, number>>({});
+  const [lastValues] = useState(readLastValues);
 
   const { register, handleSubmit, control, reset, formState } = form;
 
@@ -37,11 +38,11 @@ export function QuoteForm({ dropdowns, submitting, onSubmit, form, formRef }: Pr
 
   return (
     <form ref={formRef} onSubmit={fire}>
-      {_hasLastValues() && (
+      {Object.keys(lastValues).length > 0 && (
         <div className="mb-4 flex justify-end">
           <button
             type="button"
-            onClick={() => form.reset(_readLastValues())}
+            onClick={() => form.reset(lastValues)}
             className="inline-flex items-center gap-2 px-3 py-2 text-xs border hairline rounded-sm bg-surface hover:bg-paper transition-colors"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-muted2" aria-hidden="true" />
@@ -371,9 +372,10 @@ export function QuoteForm({ dropdowns, submitting, onSubmit, form, formRef }: Pr
 
 const LAST_KEY = "matrix.singlequote.last";
 
-function _hasLastValues(): boolean {
-  try { return !!sessionStorage.getItem(LAST_KEY); } catch { return false; }
-}
-function _readLastValues(): QuoteFormValues {
-  return JSON.parse(sessionStorage.getItem(LAST_KEY) || "{}") as QuoteFormValues;
+function readLastValues(): QuoteFormValues {
+  try {
+    return JSON.parse(sessionStorage.getItem(LAST_KEY) ?? "{}");
+  } catch {
+    return {} as QuoteFormValues;
+  }
 }

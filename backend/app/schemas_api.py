@@ -52,7 +52,6 @@ __all__ = [
     "SavedQuoteSummary",
     "SavedQuoteList",
     "AdHocPdfRequest",
-    "MapeRow",
     "CalibrationPoint",
     "TrainingRunRow",
     "PerformanceHeadline",
@@ -272,12 +271,6 @@ class AdHocPdfRequest(BaseModel):
     created_by: str = "Anonymous"
     inputs: QuoteInput
     prediction: QuotePrediction
-
-
-class MapeRow(BaseModel):
-    operation: str
-    mape: float
-    rows: int | None = None
 
 
 class CalibrationPoint(BaseModel):

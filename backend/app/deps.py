@@ -22,7 +22,6 @@ class Settings(BaseSettings):
     admin_password: str = ""
     admin_jwt_secret: str = ""
     admin_token_expiry_hours: int = 12
-    data_dir: str = "."
     cors_allow_origins: str = "http://localhost:5173"
 
     model_config = SettingsConfigDict(
@@ -77,6 +76,8 @@ def create_admin_token(
     claims = {
         "sub": "admin",
         "name": display_name or "admin",
+        "iat": datetime.now(UTC),
+        "iss": "matrix-quote-web",
         "exp": expires_at,
     }
     token = jwt.encode(claims, settings.admin_jwt_secret, algorithm=JWT_ALGORITHM)
@@ -90,8 +91,9 @@ def verify_admin_password(settings: Settings, supplied: str) -> bool:
 
 
 def require_admin(
+    *,
     authorization: Annotated[str | None, Header()] = None,
-    settings: Annotated[Settings, Depends(get_settings)] = None,
+    settings: Annotated[Settings, Depends(get_settings)],
 ) -> dict[str, str]:
     if not authorization or not authorization.lower().startswith("bearer "):
         raise HTTPException(
@@ -102,7 +104,10 @@ def require_admin(
     token = authorization.split(" ", 1)[1]
     try:
         claims = jwt.decode(
-            token, settings.admin_jwt_secret, algorithms=[JWT_ALGORITHM]
+            token,
+            settings.admin_jwt_secret,
+            algorithms=[JWT_ALGORITHM],
+            issuer="matrix-quote-web",
         )
     except PyJWTError as exc:
         raise HTTPException(

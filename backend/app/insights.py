@@ -19,7 +19,7 @@ def weekly_quotes_activity(
     Always returns exactly `weeks` entries; weeks with no saves get a zero count.
     Labels are ISO-8601 week strings, e.g. '2026-W04'.
     """
-    end = pd.Timestamp(end) if end is not None else pd.Timestamp.utcnow()
+    end = pd.Timestamp(end) if end is not None else pd.Timestamp.now("UTC")
     end_week = end.to_period("W-SUN")
     start_week = end_week - (weeks - 1)
     all_weeks = [(start_week + i).to_timestamp().strftime("%G-W%V") for i in range(weeks)]
@@ -27,7 +27,7 @@ def weekly_quotes_activity(
     if quotes.empty or "created_at" not in quotes.columns:
         return [(w, 0) for w in all_weeks]
 
-    s = pd.to_datetime(quotes["created_at"], errors="coerce").dropna()
+    s = pd.to_datetime(quotes["created_at"], errors="coerce", utc=True).dropna()
     labels = s.dt.strftime("%G-W%V")
     counts = labels.value_counts().to_dict()
     return [(w, int(counts.get(w, 0))) for w in all_weeks]
@@ -37,8 +37,8 @@ def active_quotes_last_n_days(quotes: pd.DataFrame, n: int = 30) -> int:
     """Count quotes created within the last `n` days (UTC). Returns 0 when the store is empty."""
     if quotes.empty or "created_at" not in quotes.columns:
         return 0
-    s = pd.to_datetime(quotes["created_at"], errors="coerce").dropna()
-    cutoff = pd.Timestamp.utcnow() - pd.Timedelta(days=n)
+    s = pd.to_datetime(quotes["created_at"], errors="coerce", utc=True).dropna()
+    cutoff = pd.Timestamp.now("UTC") - pd.Timedelta(days=n)
     return int((s >= cutoff).sum())
 
 

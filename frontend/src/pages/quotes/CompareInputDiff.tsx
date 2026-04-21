@@ -54,7 +54,7 @@ export function CompareInputDiff({ quotes }: { quotes: SavedQuote[] }) {
               const changed = i > 0 && v !== anchor;
               return (
                 <div
-                  key={i}
+                  key={`${field}-${i}`}
                   className={
                     "text-sm truncate " +
                     (i === 0

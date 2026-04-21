@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import { Layout } from "@/components/Layout";
@@ -7,15 +8,30 @@ import { BatchQuotes } from "@/pages/BatchQuotes";
 import { Compare } from "@/pages/Compare";
 import { DataExplorer } from "@/pages/DataExplorer";
 import { Drivers } from "@/pages/Drivers";
-import { ExecutiveOverview } from "@/pages/ExecutiveOverview";
-import { ModelPerformance } from "@/pages/ModelPerformance";
 import { Overview } from "@/pages/Overview";
 import { Quotes } from "@/pages/Quotes";
 import { SingleQuote } from "@/pages/SingleQuote";
 import { UploadTrain } from "@/pages/UploadTrain";
 
+// Lazy-load recharts-heavy pages to split them out of the main bundle.
+const ExecutiveOverview = lazy(() =>
+  import("@/pages/ExecutiveOverview").then((m) => ({ default: m.ExecutiveOverview })),
+);
+const ModelPerformance = lazy(() =>
+  import("@/pages/ModelPerformance").then((m) => ({ default: m.ModelPerformance })),
+);
+
+function PageSpinner() {
+  return (
+    <div className="flex items-center justify-center h-48 text-muted text-sm">
+      Loading…
+    </div>
+  );
+}
+
 export default function App() {
   return (
+    <Suspense fallback={<PageSpinner />}>
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<RequireAdmin><SingleQuote /></RequireAdmin>} />
@@ -62,5 +78,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
+    </Suspense>
   );
 }
