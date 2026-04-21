@@ -14,6 +14,20 @@ from .schemas_api import SavedQuote
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 
 
+def _scoped_url_fetcher(url: str):
+    """Only allow file:// URLs that resolve inside TEMPLATES_DIR; block remote."""
+    from weasyprint import default_url_fetcher  # noqa: PLC0415
+
+    if url.startswith("file://"):
+        local = Path(url[len("file://"):]).resolve()
+        tdir = TEMPLATES_DIR.resolve()
+        if tdir not in local.parents and local != tdir:
+            raise PermissionError(f"URL outside templates dir: {url}")
+    elif url.startswith(("http://", "https://")):
+        raise PermissionError(f"Remote URL fetch blocked: {url}")
+    return default_url_fetcher(url)
+
+
 BUCKET_LABELS = {
     "mechanical":    "Mechanical",
     "electrical":    "Electrical",
@@ -90,5 +104,6 @@ def render_quote_pdf(quote: SavedQuote, *, quote_number: str) -> bytes:
     pdf_bytes = HTML(
         string=html,
         base_url=str(TEMPLATES_DIR),
+        url_fetcher=_scoped_url_fetcher,
     ).write_pdf()
     return pdf_bytes
