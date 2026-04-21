@@ -39,14 +39,16 @@ def dev_client(monkeypatch) -> TestClient:
 def test_openapi_schema_not_exposed_in_prod(prod_client: TestClient) -> None:
     """ENV=prod must not serve the OpenAPI schema at /openapi.json."""
     resp = prod_client.get("/openapi.json")
-    ct = resp.headers.get("content-type", "")
-    # Either 404 (no SPA), or HTML fallback from the SPA. Either way, must
-    # NOT be application/json schema.
-    assert "application/json" not in ct, (
-        f"OpenAPI schema must not be exposed in prod; got Content-Type: {ct}"
+    # Two valid "hidden" topologies:
+    #   - API-only (no SPA dist): FastAPI returns 404 with a JSON error body.
+    #     Content-Type is application/json but the payload is {"detail":"..."},
+    #     not a schema — the status-code check is what proves hidden.
+    #   - SPA-mounted: catch-all returns 200 with index.html. Confirm the body
+    #     does not carry the OpenAPI "openapi" key.
+    assert resp.status_code in (200, 404), (
+        f"Expected 200 (SPA fallback) or 404 (no SPA); got {resp.status_code}"
     )
     if resp.status_code == 200:
-        # SPA fallback served HTML — confirm no schema content
         assert '"openapi"' not in resp.text, (
             "OpenAPI schema content leaked in prod response body"
         )
