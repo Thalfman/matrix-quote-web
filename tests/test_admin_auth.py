@@ -73,7 +73,7 @@ def test_login_accepts_display_name_and_claim_round_trips(client):
     import jwt
     claims = jwt.decode(
         token,
-        "test-secret-at-least-32-chars-long!!",
+        "TEST-ONLY-test-secret-at-least-32-chars!!",
         algorithms=["HS256"],
         issuer="matrix-quote-web",
     )
@@ -90,7 +90,7 @@ def test_login_without_name_falls_back_to_admin(client):
     import jwt
     claims = jwt.decode(
         token,
-        "test-secret-at-least-32-chars-long!!",
+        "TEST-ONLY-test-secret-at-least-32-chars!!",
         algorithms=["HS256"],
         issuer="matrix-quote-web",
     )

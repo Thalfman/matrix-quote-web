@@ -14,7 +14,7 @@ from fastapi.testclient import TestClient
 def _clean_settings_cache(monkeypatch, tmp_path):
     monkeypatch.setenv("DATA_DIR", str(tmp_path))
     monkeypatch.setenv("ADMIN_PASSWORD", "test-password")
-    monkeypatch.setenv("ADMIN_JWT_SECRET", "test-secret-at-least-32-chars-long!!")
+    monkeypatch.setenv("ADMIN_JWT_SECRET", "TEST-ONLY-test-secret-at-least-32-chars!!")
     monkeypatch.setenv("ADMIN_TOKEN_EXPIRY_HOURS", "1")
     from backend.app.deps import get_settings
     get_settings.cache_clear()
