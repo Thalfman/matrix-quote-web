@@ -5,6 +5,10 @@ Does NOT modify any vendored module.
 
 NOTE: Models are sklearn GradientBoostingRegressor bundles (not LightGBM/XGBoost),
 so pred_contrib is not available.  The shap fallback is always used.
+
+Joblib bundles are cached in-process by _load_bundle_cached (keyed on path +
+mtime_ns) so repeated requests skip disk I/O.  A retrain automatically
+invalidates the cache because the mtime changes.
 """
 
 from __future__ import annotations
