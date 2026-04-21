@@ -10,7 +10,6 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 
 import jwt
-import pytest
 from fastapi.testclient import TestClient
 
 JWT_SECRET = "TEST-ONLY-test-secret-at-least-32-chars!!"

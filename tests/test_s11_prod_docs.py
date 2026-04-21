@@ -55,7 +55,6 @@ def test_openapi_schema_not_exposed_in_prod(prod_client: TestClient) -> None:
 def test_swagger_docs_not_exposed_in_prod(prod_client: TestClient) -> None:
     """ENV=prod must not serve Swagger UI at /docs."""
     resp = prod_client.get("/docs")
-    ct = resp.headers.get("content-type", "")
     # Swagger UI HTML would contain 'swagger-ui'; the SPA index.html will not.
     if resp.status_code == 200:
         assert "swagger-ui" not in resp.text.lower(), (
