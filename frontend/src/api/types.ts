@@ -170,7 +170,6 @@ export type SavedQuoteList = {
   rows: SavedQuoteSummary[];
 };
 
-export type MapeRow       = { operation: string; mape: number; rows: number | null };
 export type CalibrationPoint = { predicted_low: number; predicted_high: number; actual: number; inside_band: boolean };
 export type TrainingRunRow = { run_id: string; trained_at: string; rows: number; overall_mape: number };
 export type PerformanceHeadline = {
