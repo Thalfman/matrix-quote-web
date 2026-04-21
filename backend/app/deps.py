@@ -22,7 +22,6 @@ class Settings(BaseSettings):
     admin_password: str = ""
     admin_jwt_secret: str = ""
     admin_token_expiry_hours: int = 12
-    data_dir: str = "."
     cors_allow_origins: str = "http://localhost:5173"
 
     model_config = SettingsConfigDict(
