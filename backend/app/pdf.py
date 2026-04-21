@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -98,7 +98,7 @@ def render_quote_pdf(quote: SavedQuote, *, quote_number: str) -> bytes:
     html = template.render(
         quote=quote,
         quote_number=quote_number,
-        prepared_on=datetime.utcnow().strftime("%b %d, %Y"),
+        prepared_on=datetime.now(UTC).strftime("%b %d, %Y"),
         input_rows=_input_rows(quote.inputs),
     )
     pdf_bytes = HTML(

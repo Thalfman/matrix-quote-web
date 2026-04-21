@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import io
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 from tempfile import SpooledTemporaryFile
 
 import pandas as pd
@@ -149,7 +149,7 @@ def batch_quote(
 @router.post("/pdf")
 def adhoc_pdf(payload: AdHocPdfRequest) -> Response:
     # Build a transient SavedQuote so the template doesn't need to branch.
-    now = datetime.utcnow()
+    now = datetime.now(UTC).replace(tzinfo=None)
     transient = SavedQuote(
         id="adhoc",
         created_at=now,
