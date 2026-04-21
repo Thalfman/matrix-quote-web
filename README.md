@@ -196,6 +196,43 @@ pytest
 cd frontend && npm test
 ```
 
+## Demo site (Vercel)
+
+The `claude/setup-demo-branch-qcep6` branch deploys to Vercel as a **static** demo — no backend, no auth, no persisted state. It shows two tools:
+
+- **Comparison Quote Tool** — browses ~20–30 real historical projects and finds the nearest match to a user-entered scenario.
+- **Machine Learning Quote Tool** — runs the 12 Gradient Boosting joblib bundles in the browser via Pyodide for live predictions.
+
+### Data
+
+Before the Vercel build can succeed, drop two CSVs on the demo branch:
+
+| Path | Contents | Row count |
+|------|----------|-----------|
+| `demo_assets/data/real/projects_real.csv` | Real historical projects (must include the 12 `*_actual_hours` columns) | ~20–30 |
+| `demo_assets/data/synthetic/projects_synthetic.csv` | Synthetic pool for ML-tool dropdown options / neighbor lookups | hundreds to a few thousand |
+
+Column schema mirrors `core/config.QUOTE_NUM_FEATURES`, `QUOTE_CAT_FEATURES`, and `TARGETS`. The build script (`scripts/build_demo_static.py`) fails fast with a clear error if required columns are missing.
+
+### Local preview
+
+```bash
+git lfs pull                                   # hydrate demo_assets/models/*.joblib
+python scripts/build_demo_static.py            # writes frontend/public/demo-assets/
+cd frontend
+VITE_DEMO_MODE=1 npm run build && npm run preview
+```
+
+### Vercel project settings (one-time)
+
+1. Import `thalfman/matrix-quote-web` in the Vercel dashboard.
+2. **Root Directory**: repo root (not `frontend/`).
+3. **Settings → Git → Git LFS**: toggle **on** so joblib files are hydrated during checkout.
+4. **Production Branch**: `claude/setup-demo-branch-qcep6` (or leave `main` and treat it as a Preview).
+5. First build may fail until both CSVs are committed; re-deploy after dropping them in.
+
+Everything else is driven by `vercel.json` + `scripts/vercel_build.sh`.
+
 ## Deployment (Railway)
 
 1. Connect the GitHub repo to a new Railway project.

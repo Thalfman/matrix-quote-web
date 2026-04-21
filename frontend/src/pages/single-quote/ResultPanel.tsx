@@ -13,6 +13,7 @@ type Props = {
   onExportPdf: () => void;
   onRemoveScenario: (id: string) => void;
   onCompare: () => void;
+  hideSaveExport?: boolean;
 };
 
 export function ResultPanel({
@@ -23,6 +24,7 @@ export function ResultPanel({
   onExportPdf,
   onRemoveScenario,
   onCompare,
+  hideSaveExport = false,
 }: Props) {
   if (isLoading) return <ResultSkeleton />;
 
@@ -51,24 +53,26 @@ export function ResultPanel({
         onRemoveScenario={onRemoveScenario}
         onCompare={onCompare}
       />
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={onSaveScenario}
-          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-surface border border-ink text-ink text-sm font-medium rounded-sm hover:bg-ink hover:text-white transition-colors"
-        >
-          <Save size={16} strokeWidth={1.75} aria-hidden="true" />
-          Save scenario
-        </button>
-        <button
-          type="button"
-          onClick={onExportPdf}
-          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-teal text-white text-sm font-medium rounded-sm hover:bg-tealDark transition-colors"
-        >
-          <Download size={16} strokeWidth={1.75} aria-hidden="true" />
-          Export PDF
-        </button>
-      </div>
+      {!hideSaveExport && (
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onSaveScenario}
+            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-surface border border-ink text-ink text-sm font-medium rounded-sm hover:bg-ink hover:text-white transition-colors"
+          >
+            <Save size={16} strokeWidth={1.75} aria-hidden="true" />
+            Save scenario
+          </button>
+          <button
+            type="button"
+            onClick={onExportPdf}
+            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-teal text-white text-sm font-medium rounded-sm hover:bg-tealDark transition-colors"
+          >
+            <Download size={16} strokeWidth={1.75} aria-hidden="true" />
+            Export PDF
+          </button>
+        </div>
+      )}
       <div className="flex items-center justify-between text-[11px] text-muted mono px-1">
         <span>model · current</span>
         <span>{opsCount} ops</span>

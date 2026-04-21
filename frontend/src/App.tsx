@@ -3,6 +3,8 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import { Layout } from "@/components/Layout";
 import { RequireAdmin } from "@/components/RequireAdmin";
+import { DemoApp } from "@/DemoApp";
+import { IS_DEMO } from "@/lib/demoMode";
 import { AdminLogin } from "@/pages/AdminLogin";
 import { BatchQuotes } from "@/pages/BatchQuotes";
 import { Compare } from "@/pages/Compare";
@@ -30,6 +32,8 @@ function PageSpinner() {
 }
 
 export default function App() {
+  if (IS_DEMO) return <DemoApp />;
+
   return (
     <Suspense fallback={<PageSpinner />}>
     <Routes>
