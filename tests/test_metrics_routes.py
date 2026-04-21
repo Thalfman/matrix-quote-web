@@ -53,3 +53,31 @@ def test_health_stays_public(client: TestClient) -> None:
     assert resp.status_code == 200
     body = resp.json()
     assert body["status"] == "ok"
+
+
+# Q-12: empty-state tests — parquets don't exist yet.
+
+def test_metrics_history_empty_state(admin_client: TestClient) -> None:
+    """history endpoint returns [] when no parquet is present."""
+    resp = admin_client.get("/api/metrics/history")
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
+def test_metrics_calibration_empty_state(admin_client: TestClient) -> None:
+    """calibration endpoint returns [] when no parquet is present."""
+    resp = admin_client.get("/api/metrics/calibration")
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
+def test_metrics_headline_empty_state(admin_client: TestClient) -> None:
+    """headline endpoint returns a PerformanceHeadline with all None fields when nothing is trained."""
+    resp = admin_client.get("/api/metrics/headline")
+    assert resp.status_code == 200
+    body = resp.json()
+    # All fields must be present and null when there is no data.
+    assert body["overall_mape"] is None
+    assert body["within_10_pct"] is None
+    assert body["within_20_pct"] is None
+    assert body["last_trained_at"] is None
