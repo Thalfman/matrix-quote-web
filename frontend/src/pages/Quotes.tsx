@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Plus, Download } from "lucide-react";
 import { toast } from "sonner";
@@ -19,7 +19,8 @@ import { QuotesTable } from "./quotes/QuotesTable";
 export function Quotes() {
   const [project, setProject] = useState<string | null>(null);
   const [industry, setIndustry] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const search = useDeferredValue(searchInput);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
 
@@ -71,11 +72,11 @@ export function Quotes() {
             industries={industries}
             project={project}
             industry={industry}
-            search={search}
+            search={searchInput}
             onChange={({ project: p, industry: i, search: s }) => {
               setProject(p);
               setIndustry(i);
-              setSearch(s);
+              setSearchInput(s);
             }}
           />
         </div>

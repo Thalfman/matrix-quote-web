@@ -37,6 +37,7 @@ export function useSavedQuotes(
     queryKey: ["savedQuotes", params],
     queryFn: async () =>
       (await api.get<SavedQuoteList>("/quotes", { params })).data,
+    staleTime: 30_000,
   });
 }
 
