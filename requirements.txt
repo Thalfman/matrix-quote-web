@@ -4,7 +4,7 @@ pandas>=2.0,<3
 numpy>=1.26,<3
 scikit-learn>=1.5,<1.6
 scipy>=1.13,<1.17
-pydantic>=2.5
+pydantic>=2.13.3
 joblib
 openpyxl
 pyarrow
